@@ -111,7 +111,7 @@ router.post("/paseo", async (req, res) => {
           resolucion,
           turno,
           lpcarga,
-          DateTime.fromISO(fecha).setLocale("es-AR").month,
+          DateTime.fromISO(fecha).month,
           localidadInfractor,
         ]
       );
