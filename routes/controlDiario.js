@@ -49,8 +49,12 @@ router.post("/", async (req, res) => {
       await pool.query(
         "insert into control_diario.control(fecha, hora, direccion, dominio, lp, acta, resolucion, turno, fechacarga, lpcarga, mes, id_motivo, otro_motivo, id_localidad) values($1, $2, $3, $4, $5, $6, $7, $8, now(), $9, $10, $11, $12, $13)",
         [
-          DateTime.fromISO(fecha).toLocaleString(),
-          DateTime.fromISO(hora).toLocaleString(DateTime.TIME_24_SIMPLE),
+          DateTime.fromISO(fecha, {
+            zone: "America/Argentina/Buenos_Aires",
+          }).toLocaleString(),
+          DateTime.fromISO(hora, {
+            zone: "America/Argentina/Buenos_Aires",
+          }).toLocaleString(DateTime.TIME_24_SIMPLE),
           direccion,
           dominio,
           lp,
