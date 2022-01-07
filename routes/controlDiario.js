@@ -101,8 +101,12 @@ router.post("/paseo", async (req, res) => {
       await pool.query(
         "insert into nuevo_control.registros(fecha, hora, direccion, motivo, dominio, lp, acta, resolucion, turno, fechacarga, lpcarga, mes, id_localidad) values($1, $2, $3, $4, $5, $6, $7, $8, $9, now(), $10, $11, $12)",
         [
-          DateTime.fromISO(fecha).toLocaleString(),
-          DateTime.fromISO(hora).toLocaleString(DateTime.TIME_24_SIMPLE),
+          DateTime.fromISO(fecha, {
+            zone: "America/Argentina/Buenos_Aires",
+          }).toLocaleString(),
+          DateTime.fromISO(hora, {
+            zone: "America/Argentina/Buenos_Aires",
+          }).toLocaleString(DateTime.TIME_24_SIMPLE),
           direccion,
           motivo,
           dominio,
