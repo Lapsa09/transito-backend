@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
   }
 
   if (req.path === "/register") {
-    if (![legajo, nombre, apellido, password, turno, telefono].every(Boolean)) {
+    if (![legajo, nombre, apellido, password, telefono].every(Boolean)) {
       return res.status(400).json("Faltan completar campos");
     } else if (!validLegajo(legajo)) {
       return res.status(401).json("Legajo invalido");
