@@ -7,7 +7,7 @@ const jwtGenerator = require("../utils/jwtGenerator");
 const authorize = require("../middleware/authorize");
 
 router.post("/register", validInfo, async (req, res) => {
-  const { legajo, nombre, apellido, password, turno, telefono } = req.body;
+  const { legajo, nombre, apellido, password, telefono } = req.body;
 
   try {
     const user = await pool.query("SELECT * FROM users WHERE legajo = $1", [
@@ -32,13 +32,31 @@ router.post("/register", validInfo, async (req, res) => {
     const bcryptPassword = await bcrypt.hash(password, salt);
 
     let newUser = await pool.query(
-      "INSERT INTO users (legajo, nombre, apellido, user_password, turno, telefono) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [legajo, nombre, apellido, bcryptPassword, turno, telefono]
+      "INSERT INTO users (legajo, nombre, apellido, user_password, turno, telefono,rol) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [
+        legajo,
+        nombre,
+        apellido,
+        bcryptPassword,
+        legajos.rows[0].turno,
+        telefono,
+        legajos.rows[0].rol,
+      ]
     );
 
     const jwtToken = jwtGenerator(newUser.rows[0].legajo);
 
-    return res.json({ jwtToken });
+    return res.json({
+      jwtToken,
+      user: {
+        legajo: newUser.rows[0].legajo,
+        nombre: newUser.rows[0].nombre,
+        apellido: newUser.rows[0].apellido,
+        turno: newUser.rows[0].turno,
+        telefono: newUser.rows[0].telefono,
+        rol: newUser.rows[0].rol,
+      },
+    });
   } catch (err) {
     res.status(500).json("Server error");
   }
@@ -73,6 +91,7 @@ router.post("/login", validInfo, async (req, res) => {
         apellido: user.rows[0].apellido,
         turno: user.rows[0].turno,
         telefono: user.rows[0].telefono,
+        rol: user.rows[0].rol,
       },
     });
   } catch (err) {
