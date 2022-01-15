@@ -63,9 +63,10 @@ router.post("/login", validInfo, async (req, res) => {
   const { legajo, password } = req.body;
 
   try {
-    const user = await pool.query("SELECT * FROM users WHERE legajo = $1", [
-      legajo,
-    ]);
+    const user = await pool.query(
+      "SELECT u.*,j.turno,j.rol FROM users u left join legajos j on u.legajo=j.legajo WHERE u.legajo = $1",
+      [legajo]
+    );
 
     if (user.rows.length === 0) {
       return res.status(401).json("Usuario no encontrado");
