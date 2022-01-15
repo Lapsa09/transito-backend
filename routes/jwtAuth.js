@@ -32,16 +32,12 @@ router.post("/register", validInfo, async (req, res) => {
     const bcryptPassword = await bcrypt.hash(password, salt);
 
     let newUser = await pool.query(
-      "INSERT INTO users (legajo, nombre, apellido, user_password, turno, telefono,rol) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-      [
-        legajo,
-        nombre,
-        apellido,
-        bcryptPassword,
-        legajos.rows[0].turno,
-        telefono,
-        legajos.rows[0].rol,
-      ]
+      `
+        with new_user as(
+          INSERT INTO users (legajo, nombre, apellido, user_password, telefono) VALUES ($1, $2, $3, $4, $5) RETURNING *
+        )select * from new_user left join legajos l on new_user.legajo=l.legajo
+      `,
+      [legajo, nombre, apellido, bcryptPassword, telefono]
     );
 
     const jwtToken = jwtGenerator(newUser.rows[0].legajo);
@@ -58,6 +54,7 @@ router.post("/register", validInfo, async (req, res) => {
       },
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json("Server error");
   }
 });
