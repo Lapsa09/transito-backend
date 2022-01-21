@@ -40,19 +40,15 @@ router.post("/register", validInfo, async (req, res) => {
       [legajo, nombre, apellido, bcryptPassword, telefono]
     );
 
-    const jwtToken = jwtGenerator(newUser.rows[0].legajo);
-
-    return res.json({
-      jwtToken,
-      user: {
-        legajo: newUser.rows[0].legajo,
-        nombre: newUser.rows[0].nombre,
-        apellido: newUser.rows[0].apellido,
-        turno: newUser.rows[0].turno,
-        telefono: newUser.rows[0].telefono,
-        rol: newUser.rows[0].rol,
-      },
+    const jwtToken = jwtGenerator({
+      legajo: user.rows[0].legajo,
+      nombre: user.rows[0].nombre,
+      apellido: user.rows[0].apellido,
+      telefono: user.rows[0].telefono,
+      turno: user.rows[0].turno,
+      rol: user.rows[0].rol,
     });
+    return res.json(jwtToken);
   } catch (err) {
     console.log(err);
     res.status(500).json("Server error");
@@ -80,18 +76,15 @@ router.post("/login", validInfo, async (req, res) => {
     if (!validPassword) {
       return res.status(401).json("Contraseña incorrecta");
     }
-    const jwtToken = jwtGenerator(user.rows[0].legajo);
-    return res.json({
-      jwtToken,
-      user: {
-        legajo: user.rows[0].legajo,
-        nombre: user.rows[0].nombre,
-        apellido: user.rows[0].apellido,
-        turno: user.rows[0].turno,
-        telefono: user.rows[0].telefono,
-        rol: user.rows[0].rol,
-      },
+    const jwtToken = jwtGenerator({
+      legajo: user.rows[0].legajo,
+      nombre: user.rows[0].nombre,
+      apellido: user.rows[0].apellido,
+      telefono: user.rows[0].telefono,
+      turno: user.rows[0].turno,
+      rol: user.rows[0].rol,
     });
+    return res.json(jwtToken);
   } catch (err) {
     res.status(500).json("Server error");
   }
