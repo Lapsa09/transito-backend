@@ -41,12 +41,12 @@ router.post("/register", validInfo, async (req, res) => {
     );
 
     const jwtToken = jwtGenerator({
-      legajo: user.rows[0].legajo,
-      nombre: user.rows[0].nombre,
-      apellido: user.rows[0].apellido,
-      telefono: user.rows[0].telefono,
-      turno: user.rows[0].turno,
-      rol: user.rows[0].rol,
+      legajo: newUser.rows[0].legajo,
+      nombre: newUser.rows[0].nombre,
+      apellido: newUser.rows[0].apellido,
+      telefono: newUser.rows[0].telefono,
+      turno: newUser.rows[0].turno,
+      rol: newUser.rows[0].rol,
     });
     return res.json(jwtToken);
   } catch (err) {
