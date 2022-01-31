@@ -7,8 +7,6 @@ const key = fs.readFileSync(process.env.CERTLOCATION);
 const cert = fs.readFileSync(process.env.KEYLOCATION);
 const port = process.env.PORT || 3001;
 
-require("dotenv").config;
-
 const app = express();
 
 app.use(express.json());
