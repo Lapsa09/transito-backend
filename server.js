@@ -1,5 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const https = require("https");
+const key = fs.readFileSync(process.env.CERTLOCATION);
+const cert = fs.readFileSync(process.env.KEYLOCATION);
 const port = process.env.PORT || 3001;
 
 require("dotenv").config;
@@ -19,4 +24,9 @@ app.use("/operativos", require("./routes/operativos"));
 app.use("/control", require("./routes/controlDiario"));
 app.use("/auth", require("./routes/jwtAuth"));
 
-app.listen(port);
+const httpsServer = https.createServer(
+  { key, cert, rejectUnauthorized: false },
+  app
+);
+
+httpsServer.listen(port);
