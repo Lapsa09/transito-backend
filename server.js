@@ -13,8 +13,11 @@ app.use(
 );
 
 app.use("/", require("./routes/index"));
-app.use("/operativos", require("./routes/operativos"));
-app.use("/control", require("./routes/controlDiario"));
+app.use("/operativos/autos", require("./routes/operativos/autos"));
+app.use("/operativos/motos", require("./routes/operativos/motos"));
+app.use("/operativos/camiones", require("./routes/operativos/camiones"));
+app.use("/control/diario", require("./routes/control/diario"));
+app.use("/control/paseo", require("./routes/control/paseo"));
 app.use("/auth", require("./routes/jwtAuth"));
 
 app.listen(port);

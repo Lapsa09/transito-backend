@@ -23,6 +23,15 @@ router.get("/zonas", async (req, res) => {
   }
 });
 
+router.get("/zonas/vl", async (req, res) => {
+  try {
+    const zonas = await pool.query("select * from vicente_lopez");
+    res.json(zonas.rows);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
 router.get("/motivos", async (req, res) => {
   try {
     const motivos = await pool.query("select * from motivos");
