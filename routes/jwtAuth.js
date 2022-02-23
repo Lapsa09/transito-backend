@@ -31,7 +31,9 @@ router.post("/register", validInfo, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(password, salt);
 
-    let newUser = await pool.query(
+    const {
+      rows: [newUser],
+    } = await pool.query(
       `
         with new_user as(
           INSERT INTO users (legajo, nombre, apellido, user_password, telefono) VALUES ($1, $2, $3, $4, $5) RETURNING *
@@ -41,12 +43,12 @@ router.post("/register", validInfo, async (req, res) => {
     );
 
     const jwtToken = jwtGenerator({
-      legajo: newUser.rows[0].legajo,
-      nombre: newUser.rows[0].nombre,
-      apellido: newUser.rows[0].apellido,
-      telefono: newUser.rows[0].telefono,
-      turno: newUser.rows[0].turno,
-      rol: newUser.rows[0].rol,
+      legajo: newUser.legajo,
+      nombre: newUser.nombre,
+      apellido: newUser.apellido,
+      telefono: newUser.telefono,
+      turno: newUser.turno,
+      rol: newUser.rol,
     });
     return res.json(jwtToken);
   } catch (err) {
