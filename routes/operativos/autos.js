@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { DateTime } = require("luxon");
 const { geocode } = require("../../middleware/geocoding");
 const getCP = require("../../middleware/getCP");
+const { alcoholemia, es_del } = require("../../middleware/municipales");
 const pool = require("../../pool");
 
 router.get("/", async (req, res) => {
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", geocode, getCP, async (req, res) => {
+router.post("/", geocode, getCP, es_del, alcoholemia, async (req, res) => {
   try {
     const {
       fecha,
@@ -61,16 +62,16 @@ router.post("/", geocode, getCP, async (req, res) => {
           parseInt(legajo_a_cargo),
           parseInt(legajo_planilla),
           turno,
-          seguridad,
+          seguridad || null,
           dominio,
-          parseInt(licencia),
+          parseInt(licencia) || null,
           acta,
           motivo,
-          parseInt(graduacion_alcoholica),
+          parseInt(graduacion_alcoholica) || null,
           resolucion,
           lpcarga,
           DateTime.fromISO(fecha).month,
-          DateTime.fromISO(fecha).week,
+          DateTime.fromISO(fecha).weekNumber,
           es_del,
           resultado,
           `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,

@@ -1,5 +1,6 @@
 module.exports = (req, res, next) => {
-  const { legajo, nombre, apellido, password, turno, telefono } = req.body;
+  const { legajo, nombre, apellido, password, telefono, confirmPassword } =
+    req.body;
 
   const validLegajo = (legajo) => {
     return /^[0-9]{5}$/.test(legajo);
@@ -34,12 +35,18 @@ module.exports = (req, res, next) => {
   }
 
   if (req.path === "/register") {
-    if (![legajo, nombre, apellido, password, telefono].every(Boolean)) {
+    if (
+      ![legajo, nombre, apellido, password, telefono, confirmPassword].every(
+        Boolean
+      )
+    ) {
       return res.status(400).json("Faltan completar campos");
     } else if (!validLegajo(legajo)) {
       return res.status(401).json("Legajo invalido");
     } else if (checkPasswordValidation(password)) {
       return res.status(401).json(checkPasswordValidation(password));
+    } else if (password !== confirmPassword) {
+      return res.status(401).json("Las contraseñas no coinciden");
     }
   } else if (req.path === "/login") {
     if (![legajo, password].every(Boolean)) {

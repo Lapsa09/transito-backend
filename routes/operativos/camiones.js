@@ -6,7 +6,7 @@ const pool = require("../../pool");
 router.get("/", async (req, res) => {
   try {
     const operativos = pool.query(
-      "select ca.fecha,ca.hora,ca.turno,ca.legajo,ca.direccion,loc.barrio as localidad,ca.cp,ca.dominio,ca.origen,ori.barrio as localidad_origen,ca.destino,dest.barrio as localidad_destino,ca.licencia,ca.remito,ca.carga,ca.resolucion,ca.acta,ca.motivo,ca.hora_carga,ca.legajo_carga from camiones.camiones ca left join barrios loc on ca.id_localidad=loc.id_barrio left join barrios ori on ca.id_origen=ori.id_barrio left join barrios dest on ca.id_destino=dest.id_barrio order by ca.id asc"
+      "select ca.fecha,ca.hora,ca.turno,ca.legajo,ca.direccion,loc.barrio as localidad,ca.cp,ca.dominio,ca.origen,ori.barrio as localidad_origen,ca.destino,dest.barrio as localidad_destino,ca.licencia,ca.remito,ca.carga,ca.resolucion,ca.acta,ca.motivo,ca.hora_carga,ca.legajo_carga,ca.id from camiones.camiones ca left join barrios loc on ca.id_localidad=loc.id_barrio left join barrios ori on ca.id_origen=ori.id_barrio left join barrios dest on ca.id_destino=dest.id_barrio order by ca.id asc"
     );
     res.json((await operativos).rows);
   } catch (error) {
