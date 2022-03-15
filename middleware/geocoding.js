@@ -14,7 +14,8 @@ const geocode = async (req, res, next) => {
     req.body.longitud = longitud;
     next();
   } catch (error) {
-    res.status(500).json("Server error");
+    console.log(error);
+    next();
   }
 };
 
