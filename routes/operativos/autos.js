@@ -53,7 +53,7 @@ router.post(
 
       if (repetido.rows.length === 0) {
         await pool.query(
-          "insert into operativos.registros(hora,dominio,licencia,acta,motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)",
+          "insert into operativos.registros(hora,dominio,licencia,acta,motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
           [
             DateTime.fromISO(hora, {
               zone: "America/Argentina/Buenos_Aires",
@@ -74,6 +74,7 @@ router.post(
             longitud,
             tipo_licencia,
             zona_infractor.id_barrio,
+            id_operativo,
           ]
         );
         res.json("Success");

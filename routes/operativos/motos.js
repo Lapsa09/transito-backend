@@ -45,6 +45,7 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
       zona_infractor,
       cp,
       direccion,
+      id_operativo,
     } = req.body;
 
     const repetido = await pool.query(
@@ -53,7 +54,7 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
     );
     if (repetido.rows.length === 0) {
       await pool.query(
-        "insert into motos.registros(dominio,licencia,acta,motivo1,motivo2,motivo3,motivo4,motivo5,resolucion,fechacarga,lpcarga,mes,semana,cp,direccion_full,id_licencia,id_zona_infractor) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,now(),$10,$11,$12,$13,$14,$15)",
+        "insert into motos.registros(dominio,licencia,acta,motivo1,motivo2,motivo3,motivo4,motivo5,resolucion,fechacarga,lpcarga,mes,semana,cp,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,now(),$10,$11,$12,$13,$14,$15,$16)",
         [
           dominio,
           licencia,
@@ -70,6 +71,7 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
           `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
           tipo_licencia,
           zona_infractor.id_barrio,
+          id_operativo,
         ]
       );
       res.json("Success");

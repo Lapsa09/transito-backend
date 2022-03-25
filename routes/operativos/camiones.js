@@ -32,6 +32,7 @@ router.post("/", operativoCamiones, geocode, async (req, res) => {
       acta,
       motivo,
       legajo_carga,
+      id_operativo,
     } = req.body;
 
     const repetido = await pool.query(
@@ -41,7 +42,7 @@ router.post("/", operativoCamiones, geocode, async (req, res) => {
 
     if (repetido.rows.length === 0) {
       await pool.query(
-        "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13)",
+        "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14)",
         [
           hora,
           dominio,
@@ -56,6 +57,7 @@ router.post("/", operativoCamiones, geocode, async (req, res) => {
           acta,
           motivo,
           legajo_carga,
+          id_operativo,
         ]
       );
       res.json("Success");

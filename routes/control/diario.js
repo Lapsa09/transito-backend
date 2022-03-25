@@ -26,6 +26,7 @@ router.post("/", operativoDiario, async (req, res) => {
     otroMotivo,
     localidadInfractor,
     fecha,
+    id_operativo,
   } = req.body;
 
   try {
@@ -36,7 +37,7 @@ router.post("/", operativoDiario, async (req, res) => {
 
     if (repetido.rows.length === 0) {
       await pool.query(
-        "insert into control_diario.control(hora, direccion, dominio, acta, resolucion, fechacarga, lpcarga, mes, id_motivo, otro_motivo, id_localidad) values($1, $2, $3, $4, $5, now(), $6, $7, $8, $9, $10)",
+        "insert into control_diario.control(hora, direccion, dominio, acta, resolucion, fechacarga, lpcarga, mes, id_motivo, otro_motivo, id_localidad,id_operativo) values($1, $2, $3, $4, $5, now(), $6, $7, $8, $9, $10, $11)",
         [
           DateTime.fromISO(hora, {
             zone: "America/Argentina/Buenos_Aires",
@@ -50,6 +51,7 @@ router.post("/", operativoDiario, async (req, res) => {
           motivo,
           otroMotivo,
           localidadInfractor.id_barrio,
+          id_operativo,
         ]
       );
       res.send("Success");
