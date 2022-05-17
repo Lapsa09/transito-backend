@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const { DateTime } = require("luxon");
 const pool = require("../../pool");
 const { operativoDiario } = require("../../middleware/operativo");
+const { dateFormat, timeFormat, getMonth } = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -32,22 +32,20 @@ router.post("/", operativoDiario, async (req, res) => {
   try {
     const repetido = await pool.query(
       "select v.dominio,o.fecha from control_diario.control v inner join control_diario.operativos o on o.id_op=v.id_operativo where o.fecha=$1 and v.dominio=$2",
-      [DateTime.fromISO(fecha).toLocaleString(), dominio]
+      [dateFormat(fecha), dominio]
     );
 
     if (repetido.rows.length === 0) {
       await pool.query(
         "insert into control_diario.control(hora, direccion, dominio, acta, resolucion, fechacarga, lpcarga, mes, id_motivo, otro_motivo, id_localidad,id_operativo) values($1, $2, $3, $4, $5, now(), $6, $7, $8, $9, $10, $11)",
         [
-          DateTime.fromISO(hora, {
-            zone: "America/Argentina/Buenos_Aires",
-          }).toLocaleString(DateTime.TIME_24_SIMPLE),
+          timeFormat(hora),
           direccion,
           dominio,
           acta,
           resolucion,
           lpcarga,
-          DateTime.fromISO(fecha).month,
+          getMonth(fecha),
           motivo,
           otroMotivo,
           localidadInfractor.id_barrio,

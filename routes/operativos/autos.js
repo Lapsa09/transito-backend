@@ -1,10 +1,15 @@
 const router = require("express").Router();
-const { DateTime } = require("luxon");
 const { geocode } = require("../../middleware/geocoding");
 const getCP = require("../../middleware/getCP");
 const { alcoholemia, es_del } = require("../../middleware/municipales");
 const { operativoAlcoholemia } = require("../../middleware/operativo");
 const pool = require("../../pool");
+const {
+  dateFormat,
+  timeFormat,
+  getMonth,
+  getWeek,
+} = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -48,16 +53,14 @@ router.post(
 
       const repetido = await pool.query(
         "select v.dominio,o.fecha from operativos.registros v inner join operativos.operativos o on o.id_op=v.id_operativo where o.fecha=$1 and v.dominio=$2",
-        [DateTime.fromISO(fecha).toLocaleString(), dominio]
+        [dateFormat(fecha), dominio]
       );
 
       if (repetido.rows.length === 0) {
         await pool.query(
           "insert into operativos.registros(hora,dominio,licencia,acta,motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
           [
-            DateTime.fromISO(hora, {
-              zone: "America/Argentina/Buenos_Aires",
-            }).toLocaleString(DateTime.TIME_24_SIMPLE),
+            timeFormat(hora),
             dominio,
             parseInt(licencia) || null,
             acta,
@@ -65,8 +68,8 @@ router.post(
             parseInt(graduacion_alcoholica) || null,
             resolucion,
             lpcarga,
-            DateTime.fromISO(fecha).month,
-            DateTime.fromISO(fecha).weekNumber,
+            getMonth(fecha),
+            getWeek(fecha),
             es_del,
             resultado,
             `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,

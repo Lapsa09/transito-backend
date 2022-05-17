@@ -3,6 +3,7 @@ const { DateTime } = require("luxon");
 const { geocode } = require("../../middleware/geocoding");
 const { operativoCamiones } = require("../../middleware/operativo");
 const pool = require("../../pool");
+const { dateFormat, timeFormat } = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -37,14 +38,14 @@ router.post("/", operativoCamiones, geocode, async (req, res) => {
 
     const repetido = await pool.query(
       "select ca.dominio,o.fecha from camiones.registros ca inner join camiones.operativos o on o.id_op=ca.id_operativo where o.fecha=$1 and ca.dominio=$2",
-      [DateTime.fromISO(fecha).toLocaleString(), dominio]
+      [dateFormat(fecha), dominio]
     );
 
     if (repetido.rows.length === 0) {
       await pool.query(
         "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14)",
         [
-          hora,
+          timeFormat(hora),
           dominio,
           origen,
           localidad_origen.id_barrio,
