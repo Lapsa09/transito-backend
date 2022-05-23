@@ -1,9 +1,8 @@
 const pool = require("../pool");
-const arrayFormat = require("../utils/arrayFormat");
 
 const filterByDate = async (req, res, next) => {
   const { filterDate } = req.body;
-  if (!filterDate || filterDate === undefined) next();
+  if (filterDate == null) next();
   else
     try {
       const fechas = await pool.query(
@@ -27,7 +26,7 @@ const filterByDate = async (req, res, next) => {
 
 const filterByWeekDay = async (req, res, next) => {
   const { filterWD } = req.body;
-  if ((filterWD == false || filterWD === undefined) && filterWD !== 0) next();
+  if (filterWD == null) next();
   else
     try {
       const data = await pool.query(
