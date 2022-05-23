@@ -14,4 +14,7 @@ const getMonth = (fecha) => DateTime.fromISO(fecha).month;
 
 const getWeek = (fecha) => DateTime.fromISO(fecha).weekNumber;
 
-module.exports = { dateFormat, timeFormat, getMonth, getWeek };
+const getMonthName = (fecha) =>
+  DateTime.fromJSDate(fecha).monthLong.toLocaleUpperCase();
+
+module.exports = { dateFormat, timeFormat, getMonth, getWeek, getMonthName };
