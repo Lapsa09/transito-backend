@@ -1,4 +1,4 @@
-const { getMonthName } = require("./dateFormat");
+const { getMonthName, getYear, getMonth } = require("./dateFormat");
 const groupByInspector = (data) => {
   const arr = [];
   data.forEach((d) => {
@@ -43,11 +43,16 @@ const groupByInspector = (data) => {
 const groupByServicio = (data) => {
   const arr = [];
   data.forEach((d) => {
-    const busca = arr.find((a) => a.cliente === d.cliente);
+    const busca = arr.find(
+      (a) =>
+        a.cliente === d.cliente.toUpperCase() &&
+        a.mes.id === getMonth(d.fecha_servicio) &&
+        a.año === getYear(d.fecha_servicio)
+    );
     if (busca) {
       busca.servicios.push({
         id: d.id_servicio,
-        memo: d.memo,
+        memo: parseInt(d.memo),
         recibo: parseInt(d.recibo),
         fecha_recibo: d.fecha_recibo,
         importe_recibo: parseInt(d.importe_recibo),
@@ -65,7 +70,12 @@ const groupByServicio = (data) => {
       );
     } else {
       const obj = {};
-      obj.cliente = d.cliente;
+      obj.cliente = d.cliente.toUpperCase();
+      obj.mes = {
+        id: getMonth(d.fecha_servicio),
+        name: getMonthName(d.fecha_servicio),
+      };
+      obj.año = getYear(d.fecha_servicio);
       obj.servicios = [
         {
           id: d.id_servicio,

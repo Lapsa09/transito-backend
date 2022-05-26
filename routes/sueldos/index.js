@@ -28,16 +28,18 @@ router.get("/operarios", async (req, res) => {
 
 router.get("/clientes", async (req, res) => {
   try {
-    const { _sort, _order, _start, _end } = req.query;
+    const { _sort, _order, m, y, q } = req.query;
     const clientes = await pool.query(
       "select s.id_servicio,c.cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo from sueldos.clientes c inner join sueldos.servicios s on c.id_cliente=s.id_cliente order by s.id_servicio asc"
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    const response = groupByServicio(clientes.rows).sort((a, b) =>
-      sorting(a, b, _order, _sort)
-    );
+    const response = groupByServicio(clientes.rows)
+      .sort((a, b) => sorting(a, b, _order, _sort))
+      .filter((row) => (q ? row.cliente === q : row))
+      .filter((row) => (m ? row.mes.id == m : row))
+      .filter((row) => (y ? row.año == y : row));
     res.set("X-Total-Count", response.length);
-    res.json(setArrayId(response.slice(_start, _end)));
+    res.json(setArrayId(response));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

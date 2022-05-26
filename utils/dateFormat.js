@@ -10,11 +10,20 @@ const timeFormat = (hora) =>
     zone: "America/Argentina/Buenos_Aires",
   }).toLocaleString(DateTime.TIME_24_SIMPLE);
 
-const getMonth = (fecha) => DateTime.fromISO(fecha).month;
+const getMonth = (fecha) => DateTime.fromJSDate(fecha).month;
 
 const getWeek = (fecha) => DateTime.fromISO(fecha).weekNumber;
 
 const getMonthName = (fecha) =>
-  DateTime.fromJSDate(fecha).monthLong.toLocaleUpperCase();
+  DateTime.fromJSDate(fecha).monthLong?.toUpperCase();
 
-module.exports = { dateFormat, timeFormat, getMonth, getWeek, getMonthName };
+const getYear = (fecha) => DateTime.fromJSDate(fecha).year;
+
+module.exports = {
+  dateFormat,
+  timeFormat,
+  getMonth,
+  getWeek,
+  getMonthName,
+  getYear,
+};
