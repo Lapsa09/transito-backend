@@ -1,17 +1,19 @@
-const { getMonthName, getYear, getMonth } = require("./dateFormat");
+const { getMonthName, getYear, getMonthJS } = require("./dateFormat");
 const groupByInspector = (data) => {
   const arr = [];
   data.forEach((d) => {
     const busca = arr.find(
       (a) =>
-        a.inspector === `${d["legajo"]} ${d["nombre"]}` &&
-        a.mes === getMonthName(d["fecha_recibo"])
+        a.legajo === d.legajo &&
+        a.mes.id === getMonthJS(d.fecha_servicio) &&
+        a.año === getYear(d.fecha_servicio)
     );
     if (busca) {
       busca.servicios.push({
         memo: d.memo,
         recibo: parseInt(d.recibo),
         fecha_recibo: d.fecha_recibo,
+        fecha_servicio: d.fecha_servicio,
         a_cobrar: parseInt(d.a_cobrar),
       });
       busca.total = busca.servicios.reduce(
@@ -20,13 +22,19 @@ const groupByInspector = (data) => {
       );
     } else {
       const obj = {};
-      obj.inspector = `${d["legajo"]} ${d["nombre"]}`;
-      obj.mes = getMonthName(d["fecha_recibo"]);
+      obj.legajo = d.legajo;
+      obj.inspector = d.nombre;
+      obj.mes = {
+        id: getMonthJS(d.fecha_servicio),
+        name: getMonthName(d.fecha_servicio),
+      };
+      obj.año = getYear(d.fecha_servicio);
       obj.servicios = [
         {
           memo: d.memo,
           recibo: parseInt(d.recibo),
           fecha_recibo: d.fecha_recibo,
+          fecha_servicio: d.fecha_servicio,
           a_cobrar: parseInt(d.a_cobrar),
         },
       ];
@@ -40,13 +48,13 @@ const groupByInspector = (data) => {
   return arr;
 };
 
-const groupByServicio = (data) => {
+const groupByServicio = (data, servicios) => {
   const arr = [];
   data.forEach((d) => {
     const busca = arr.find(
       (a) =>
         a.cliente === d.cliente.toUpperCase() &&
-        a.mes.id === getMonth(d.fecha_servicio) &&
+        a.mes.id === getMonthJS(d.fecha_servicio) &&
         a.año === getYear(d.fecha_servicio)
     );
     if (busca) {
@@ -59,6 +67,7 @@ const groupByServicio = (data) => {
         fecha_servicio: d.fecha_servicio,
         importe_servicio: parseInt(d.importe_servicio),
         acopio: parseInt(d.acopio),
+        operarios: getOperarios(d.id_servicio, servicios),
       });
       busca.a_deudor = busca.servicios.reduce(
         (a, b) => a + parseInt(b.importe_servicio),
@@ -70,9 +79,10 @@ const groupByServicio = (data) => {
       );
     } else {
       const obj = {};
+      obj.id = d.id_cliente;
       obj.cliente = d.cliente.toUpperCase();
       obj.mes = {
-        id: getMonth(d.fecha_servicio),
+        id: getMonthJS(d.fecha_servicio),
         name: getMonthName(d.fecha_servicio),
       };
       obj.año = getYear(d.fecha_servicio);
@@ -86,6 +96,7 @@ const groupByServicio = (data) => {
           fecha_servicio: d.fecha_servicio,
           importe_servicio: parseInt(d.importe_servicio),
           acopio: parseInt(d.acopio),
+          operarios: getOperarios(d.id_servicio, servicios),
         },
       ];
       obj.a_deudor = obj.servicios.reduce(
@@ -127,6 +138,16 @@ const groupByMemo = (data) => {
     }
   });
   return arr;
+};
+
+const getOperarios = (id, data) => {
+  const busca = data.filter((d) => id === d.id_servicio);
+
+  return busca.map((row) => ({
+    legajo: row.legajo,
+    a_cobrar: row.a_cobrar,
+    nombre: row.nombre,
+  }));
 };
 
 const setArrayId = (array) =>
