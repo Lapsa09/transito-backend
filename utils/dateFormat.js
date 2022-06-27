@@ -12,6 +12,21 @@ const timeFormat = (hora) =>
 
 const getMonth = (fecha) => DateTime.fromISO(fecha).month;
 
+const getMonthJS = (fecha) => DateTime.fromJSDate(fecha).month;
+
 const getWeek = (fecha) => DateTime.fromISO(fecha).weekNumber;
 
-module.exports = { dateFormat, timeFormat, getMonth, getWeek };
+const getMonthName = (fecha) =>
+  DateTime.fromJSDate(fecha).monthLong?.toUpperCase();
+
+const getYear = (fecha) => DateTime.fromJSDate(fecha).year;
+
+module.exports = {
+  dateFormat,
+  timeFormat,
+  getMonth,
+  getWeek,
+  getMonthName,
+  getYear,
+  getMonthJS,
+};
