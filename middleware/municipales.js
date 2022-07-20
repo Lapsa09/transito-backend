@@ -9,7 +9,7 @@ const es_del = async (req, res, next) => {
       (zona) => zona.id_barrio === zona_infractor.id_barrio
     );
     const zonas = zonasVL.rows.map((zona) => zona.barrio);
-    if (zonas.includes(zona.barrio)) es_del = "VILO";
+    if (zonas.includes(zona.barrio)) req.body.es_del = "VILO";
     else req.body.es_del = "FUERA DEL MUNICIPIO";
     next();
   } catch (error) {

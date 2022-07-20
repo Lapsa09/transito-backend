@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const pool = require("../../pool");
 const { operativoDiario } = require("../../middleware/operativo");
-const { dateFormat, timeFormat, getMonth } = require("../../utils/dateFormat");
+const { timeFormat, getMonth } = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -10,7 +10,8 @@ router.get("/", async (req, res) => {
     );
     res.json(controles.rows);
   } catch (error) {
-    res.status(500).json(error);
+    console.log(error);
+    res.status(500).json("Server error");
   }
 });
 
@@ -24,15 +25,15 @@ router.post("/", operativoDiario, async (req, res) => {
     lpcarga,
     motivo,
     otroMotivo,
-    localidadInfractor,
+    localidad,
     fecha,
     id_operativo,
   } = req.body;
 
   try {
     const repetido = await pool.query(
-      "select v.dominio,o.fecha from control_diario.control v inner join control_diario.operativos o on o.id_op=v.id_operativo where o.fecha=$1 and v.dominio=$2",
-      [dateFormat(fecha), dominio]
+      "select dominio,id_operativo from control_diario.control where id_operativo=$1 and dominio=$2",
+      [id_operativo, dominio]
     );
 
     if (repetido.rows.length === 0) {
@@ -48,7 +49,7 @@ router.post("/", operativoDiario, async (req, res) => {
           getMonth(fecha),
           motivo,
           otroMotivo,
-          localidadInfractor.id_barrio,
+          localidad.id_barrio,
           id_operativo,
         ]
       );
@@ -57,7 +58,8 @@ router.post("/", operativoDiario, async (req, res) => {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }
   } catch (error) {
-    res.status(500).send(error);
+    console.log(error);
+    res.status(500).send("Server error");
   }
 });
 

@@ -3,7 +3,7 @@ const { geocode } = require("../../middleware/geocoding");
 const getCP = require("../../middleware/getCP");
 const { operativoMotos } = require("../../middleware/operativo");
 const pool = require("../../pool");
-const { dateFormat, getMonth, getWeek } = require("../../utils/dateFormat");
+const { getMonth, getWeek } = require("../../utils/dateFormat");
 
 router.get("/motivos", async (req, res) => {
   try {
@@ -44,13 +44,15 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
       id_operativo,
     } = req.body;
 
+    console.log(req.body);
+
     const repetido = await pool.query(
-      "select r.dominio,o.fecha from motos.registros r inner join motos.operativos o on o.id=op=r.id_operativo where o.fecha=$1 and r.dominio=$2",
-      [dateFormat(fecha), dominio]
+      "select dominio,id_operativo from motos.registros where id_operativo=$1 and dominio=$2",
+      [id_operativo, dominio]
     );
     if (repetido.rows.length === 0) {
       const id_v = await pool.query(
-        "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,cp,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning id",
+        "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning id",
         [
           dominio,
           licencia,
@@ -68,7 +70,7 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
       for (const { motivo } in motivos) {
         await pool.query(
           "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
-          [id_v.rows[0], motivo]
+          [id_v.rows[0].id, motivo]
         );
       }
       res.json("Success");
@@ -76,7 +78,8 @@ router.post("/", getCP, geocode, operativoMotos, async (req, res) => {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }
   } catch (error) {
-    res.status(500).json(error);
+    console.log(error);
+    res.status(500).json("Server error");
   }
 });
 

@@ -4,12 +4,7 @@ const getCP = require("../../middleware/getCP");
 const { alcoholemia, es_del } = require("../../middleware/municipales");
 const { operativoAlcoholemia } = require("../../middleware/operativo");
 const pool = require("../../pool");
-const {
-  dateFormat,
-  timeFormat,
-  getMonth,
-  getWeek,
-} = require("../../utils/dateFormat");
+const { timeFormat, getMonth, getWeek } = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -26,6 +21,7 @@ router.get("/", async (req, res) => {
 router.post(
   "/",
   getCP,
+  geocode,
   es_del,
   alcoholemia,
   operativoAlcoholemia,
@@ -49,16 +45,17 @@ router.post(
         longitud,
         tipo_licencia,
         zona_infractor,
+        id_operativo,
       } = req.body;
 
       const repetido = await pool.query(
-        "select v.dominio,o.fecha from operativos.registros v inner join operativos.operativos o on o.id_op=v.id_operativo where o.fecha=$1 and v.dominio=$2",
-        [dateFormat(fecha), dominio]
+        "select dominio,id_operativo from operativos.registros where id_operativo=$1 and dominio=$2",
+        [id_operativo, dominio]
       );
 
       if (repetido.rows.length === 0) {
         await pool.query(
-          "insert into operativos.registros(hora,dominio,licencia,acta,motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
+          "insert into operativos.registros(hora,dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
           [
             timeFormat(hora),
             dominio,

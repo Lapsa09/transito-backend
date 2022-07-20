@@ -49,46 +49,56 @@ const operativoAlcoholemia = async (req, res, next) => {
 };
 
 const operativoCamiones = async (req, res, next) => {
-  const { fecha, turno, legajo, direccion, localidad } = req.body;
+  const { fecha, turno, legajo, direccion, zona } = req.body;
 
-  const op = await pool.query(
-    "select id_op from camiones.operativos where fecha=$1 and turno=$2 and legajo=$3 and direccion=$4 and localidad=$5",
-    [dateFormat(fecha), turno, legajo, direccion, localidad]
-  );
-
-  if (op.rows.length === 0) {
-    const id_op = await pool.query(
-      "insert into camiones.operativos(fecha,turno,legajo,direccion,localidad) values($1,$2,$3,$4,$5) returning id_op",
-      [dateFormat(fecha), turno, legajo, direccion, localidad]
+  try {
+    const op = await pool.query(
+      "select id_op from camiones.operativos where fecha=$1 and turno=$2 and legajo=$3 and direccion=$4 and id_localidad=$5",
+      [dateFormat(fecha), turno, legajo, direccion, zona]
     );
 
-    req.body.id_operativo = id_op.rows[0].id_op;
-    next();
-  } else {
-    req.body.id_operativo = op.rows[0].id_op;
-    next();
+    if (op.rows.length === 0) {
+      const id_op = await pool.query(
+        "insert into camiones.operativos(fecha,turno,legajo,direccion,id_localidad) values($1,$2,$3,$4,$5) returning id_op",
+        [dateFormat(fecha), turno, legajo, direccion, zona]
+      );
+
+      req.body.id_operativo = id_op.rows[0].id_op;
+      next();
+    } else {
+      req.body.id_operativo = op.rows[0].id_op;
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
   }
 };
 
 const operativoDiario = async (req, res, next) => {
   const { fecha, turno, lp } = req.body;
 
-  const op = await pool.query(
-    "select id_op from control_diario.operativos where fecha=$1 and turno=$2 and legajo_planilla=$3",
-    [dateFormat(fecha), turno, lp]
-  );
-
-  if (op.rows.length === 0) {
-    const id_op = await pool.query(
-      "insert into control_diario.operativos(fecha,turno,legajo_planilla) values($1,$2,$3) returning id_op",
+  try {
+    const op = await pool.query(
+      "select id_op from control_diario.operativos where fecha=$1 and turno=$2 and legajo_planilla=$3",
       [dateFormat(fecha), turno, lp]
     );
 
-    req.body.id_operativo = id_op.rows[0].id_op;
-    next();
-  } else {
-    req.body.id_operativo = op.rows[0].id_op;
-    next();
+    if (op.rows.length === 0) {
+      const id_op = await pool.query(
+        "insert into control_diario.operativos(fecha,turno,legajo_planilla) values($1,$2,$3) returning id_op",
+        [dateFormat(fecha), turno, lp]
+      );
+
+      req.body.id_operativo = id_op.rows[0].id_op;
+      next();
+    } else {
+      req.body.id_operativo = op.rows[0].id_op;
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.statud(500).json("Server error");
   }
 };
 
@@ -124,25 +134,12 @@ const operativoMotos = async (req, res, next) => {
     turno,
     seguridad,
     zona,
+    cp,
   } = req.body;
 
-  const op = await pool.query(
-    "select id_op from motos.operativos where fecha=$1 and hora=$2 and direccion=$3 and legajo_a_cargo=4 and legajo_planilla=$5 and turno=$6 and seguridad=$7 and id_zona=$8",
-    [
-      dateFormat(fecha),
-      timeFormat(hora),
-      direccion,
-      legajo_a_cargo,
-      legajo_planilla,
-      turno,
-      seguridad,
-      zona,
-    ]
-  );
-
-  if (op.rows.length === 0) {
-    const id_op = await pool.query(
-      "insert into motos.operativos(fecha,hora,direccion,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona) values($1,$2,$3,$4,$5,$6,$7,$8) returning id_op",
+  try {
+    const op = await pool.query(
+      "select id_op from motos.operativos where fecha=$1 and hora=$2 and qth=$3 and legajo_a_cargo=$4 and legajo_planilla=$5 and turno=$6 and seguridad=$7 and id_zona=$8 and cp=$9",
       [
         dateFormat(fecha),
         timeFormat(hora),
@@ -152,14 +149,35 @@ const operativoMotos = async (req, res, next) => {
         turno,
         seguridad,
         zona,
+        cp,
       ]
     );
 
-    req.body.id_operativo = id_op.rows[0].id_op;
-    next();
-  } else {
-    req.body.id_operativo = op.rows[0].id_op;
-    next();
+    if (op.rows.length === 0) {
+      const id_op = await pool.query(
+        "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona,cp) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
+        [
+          dateFormat(fecha),
+          timeFormat(hora),
+          direccion,
+          legajo_a_cargo,
+          legajo_planilla,
+          turno,
+          seguridad,
+          zona,
+          cp,
+        ]
+      );
+
+      req.body.id_operativo = id_op.rows[0].id_op;
+      next();
+    } else {
+      req.body.id_operativo = op.rows[0].id_op;
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
   }
 };
 

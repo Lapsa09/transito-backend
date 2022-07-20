@@ -10,6 +10,8 @@ const timeFormat = (hora) =>
     zone: "America/Argentina/Buenos_Aires",
   }).toLocaleString(DateTime.TIME_24_SIMPLE);
 
+const dateFormatJS = (fecha) => DateTime.fromJSDate(fecha).toLocaleString();
+
 const getMonth = (fecha) => DateTime.fromISO(fecha).month;
 
 const getMonthJS = (fecha) => DateTime.fromJSDate(fecha).month;
@@ -29,4 +31,5 @@ module.exports = {
   getMonthName,
   getYear,
   getMonthJS,
+  dateFormatJS,
 };

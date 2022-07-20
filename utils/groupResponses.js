@@ -153,4 +153,121 @@ const getOperarios = (id, data) => {
 const setArrayId = (array) =>
   array.map((item, index) => ({ ...item, id: index }));
 
-module.exports = { groupByInspector, setArrayId, groupByServicio, groupByMemo };
+const groupByDay = (data) => {
+  const array = [];
+
+  data.forEach((d) => {
+    const busca = array.find((a) => a.id === d.id);
+
+    if (busca != null) {
+      busca[d.horario] ??= [];
+      busca[d.horario].push({
+        id: d.id_rec,
+        calles: d.calles,
+        trafico: d.nivel,
+        tiempo: d.tiempo,
+        tiempo_hist: d.tiempo_hist,
+        velocidad: d.velocidad,
+        velocidad_hist: d.velocidad_hist,
+      });
+    } else {
+      const obj = {
+        id: d.id,
+        fecha: d.fecha,
+      };
+      obj[d.horario] = [
+        {
+          id: d.id_rec,
+          calles: d.calles,
+          trafico: d.nivel,
+          tiempo: d.tiempo,
+          tiempo_hist: d.tiempo_hist,
+          velocidad: d.velocidad,
+          velocidad_hist: d.velocidad_hist,
+        },
+      ];
+      array.push(obj);
+    }
+  });
+  return array;
+};
+
+const promedio = (data) => {
+  const res = {};
+  data.forEach((d) => {
+    res[d.horario] ??= [];
+    res[d.horario].push({
+      id: d.id_calles,
+      calles: d.calles,
+      trafico: calles[Math.round(d.nivel_trafico)],
+      tiempo: Math.round(d.tiempo),
+      tiempo_hist: Math.round(d.tiempo_hist),
+      velocidad: Math.round(d.velocidad),
+      velocidad_hist: Math.round(d.velocidad_hist),
+    });
+  });
+  return res;
+};
+
+const getSingleService = (data) => {
+  const res = {
+    id: data[0].id_servicio,
+    recibo: data[0].recibo,
+    fecha_recibo: data[0].fecha_recibo,
+    importe_recibo: data[0].importe_recibo,
+    fecha_servicio: data[0].fecha_servicio,
+    importe_servicio: data[0].importe_servicio,
+    acopio: data[0].acopio,
+    memo: data[0].memo,
+    operarios: [],
+  };
+
+  data.forEach(({ legajo, nombre, a_cobrar, hora_inicio, hora_fin }) => {
+    res.operarios.push({ legajo, nombre, a_cobrar, hora_inicio, hora_fin });
+  });
+
+  return res;
+};
+
+const groupByDate = (data) => {
+  const res = [];
+
+  data.forEach((item) => {
+    const busca = res.find(
+      (row) =>
+        row.fecha_servicio.toLocaleString() ===
+        item.fecha_servicio.toLocaleString()
+    );
+
+    if (busca != null) {
+      busca.servicios.push({
+        ...item,
+      });
+    } else {
+      res.push({
+        fecha_servicio: item.fecha_servicio,
+        servicios: [{ ...item }],
+      });
+    }
+  });
+  return setArrayId(res);
+};
+
+const calles = {
+  1: "Normal",
+  2: "Trafico Ligero",
+  3: "Trafico Moderado",
+  4: "Trafico Pesado",
+  5: "Embotellamiento",
+};
+
+module.exports = {
+  groupByInspector,
+  setArrayId,
+  groupByServicio,
+  groupByMemo,
+  groupByDay,
+  promedio,
+  getSingleService,
+  groupByDate,
+};
