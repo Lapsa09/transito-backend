@@ -74,7 +74,9 @@ router.post("/", fetchWaze, async (req, res) => {
 
 router.get("/dates", async (req, res) => {
   try {
-    const dias = await pool.query("select * from waze.dia");
+    const dias = await pool.query(
+      "select extract(month from fecha)as mes,json_agg(json_build_object('id',id,'fecha',fecha)) as fechas from waze.dia group by mes order by mes asc"
+    );
     res.json(dias.rows);
   } catch (error) {
     console.log(error);

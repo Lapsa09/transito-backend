@@ -7,6 +7,7 @@ const {
 } = require("../../utils/groupResponses");
 const { sorting } = require("../../utils/arrayFormat");
 const { dateFormat } = require("../../utils/dateFormat");
+const sueldos = require("../../middleware/sueldos");
 
 router.get("/operarios", async (req, res) => {
   try {
@@ -124,7 +125,7 @@ router.get("/recibos/:id", async (req, res) => {
     res.json([]);
   } else {
     const list = await pool.query(
-      "select id_servicio as id, recibo,fecha_recibo,importe_recibo,id_cliente from sueldos.servicios where id_cliente=$1",
+      "select id_servicio as id, recibo,fecha_recibo,importe_recibo,id_cliente from sueldos.servicios where id_cliente=$1 and acopio>0",
       [id]
     );
 
@@ -150,9 +151,56 @@ router.get("/clientes/:id", async (req, res) => {
   }
 });
 
-router.post("/clientes", (req, res) => {
-  console.log(req.body);
-  res.json({ data: req.body });
+router.post("/clientes", sueldos, async (req, res) => {
+  try {
+    const {
+      id_cliente,
+      memo,
+      fecha_servicio,
+      feriado,
+      operarios,
+      recibo,
+      fecha_recibo,
+      importe_recibo,
+      importe_servicio,
+      acopio,
+    } = req.body;
+
+    const servicio = await pool.query(
+      "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado,acopio) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio",
+      [
+        id_cliente,
+        memo,
+        recibo,
+        fecha_recibo,
+        importe_recibo,
+        fecha_servicio,
+        importe_servicio,
+        feriado,
+        acopio,
+      ]
+    );
+    const {
+      rows: [{ id_servicio }],
+    } = servicio;
+
+    for (const operario in operarios) {
+      await pool.query(
+        "insert into sueldos.operarios_servicios (legajo,id_servicio,a_cobrar,hora_inicio,hora_fin) values ($1,$2,$3,$4,$5)",
+        [
+          operario.legajo,
+          id_servicio,
+          operario.a_cobrar,
+          operario.hora_inicio,
+          operario.hora_fin,
+        ]
+      );
+    }
+
+    res.json({ data: servicio });
+  } catch (error) {
+    res.status(500).json({ data: "Server error" });
+  }
 });
 
 router.post("/clientes/list", async (req, res) => {
@@ -182,9 +230,54 @@ router.post("/operarios/list", async (req, res) => {
   }
 });
 
-router.put("/clientes/:id", (req, res) => {
-  console.log(req.body);
-  res.json({ data: req.body });
+router.put("/clientes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      id_cliente,
+      memo,
+      fecha_servicio,
+      feriado,
+      operarios,
+      recibo,
+      fecha_recibo,
+      importe_recibo,
+      importe_servicio,
+    } = req.body;
+
+    const servicio = await pool.query(
+      "update sueldos.servicios set id_cliente=$1,memo=$2,recibo=$3,fecha_recibo=$4,importe_recibo=$5,fecha_servicio=$6,importe_servicio=$6,feriado=$7,acopio=$8) where id_servicio=$9",
+      [
+        id_cliente,
+        memo,
+        recibo,
+        fecha_recibo,
+        importe_recibo,
+        fecha_servicio,
+        importe_servicio,
+        feriado,
+        importe_recibo - importe_servicio,
+        id,
+      ]
+    );
+
+    for (const operario in operarios) {
+      await pool.query(
+        "update sueldos.operarios_servicios set legajo=$1,a_cobrar=$2,hora_inicio=$3,hora_fin=$4 where id_servicio=$5",
+        [
+          operario.legajo,
+          operario.a_cobrar,
+          operario.hora_inicio,
+          operario.hora_fin,
+          id,
+        ]
+      );
+    }
+
+    res.json({ data: servicio });
+  } catch (error) {
+    res.status(500).json({ data: "Server error" });
+  }
 });
 
 module.exports = router;

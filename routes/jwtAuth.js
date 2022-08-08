@@ -34,11 +34,7 @@ router.post("/register", validInfo, async (req, res) => {
     const {
       rows: [newUser],
     } = await pool.query(
-      `
-        with new_user as(
-          INSERT INTO users (legajo, nombre, apellido, user_password, telefono) VALUES ($1, $2, $3, $4, $5) RETURNING *
-        )select * from new_user left join legajos l on new_user.legajo=l.legajo
-      `,
+      "with new_user as(INSERT INTO users (legajo, nombre, apellido, user_password, telefono) VALUES ($1, $2, $3, $4, $5) RETURNING * ) select * from new_user left join legajos l on new_user.legajo=l.legajo join permisos p on l.id_rol=p.id",
       [legajo, nombre, apellido, bcryptPassword, telefono]
     );
 
@@ -48,7 +44,7 @@ router.post("/register", validInfo, async (req, res) => {
       apellido: newUser.apellido,
       telefono: newUser.telefono,
       turno: newUser.turno,
-      rol: newUser.rol,
+      rol: newUser.permiso,
     });
     return res.json(jwtToken);
   } catch (err) {
@@ -62,7 +58,7 @@ router.post("/login", validInfo, async (req, res) => {
 
   try {
     const user = await pool.query(
-      "SELECT u.*,j.turno,j.rol FROM users u left join legajos j on u.legajo=j.legajo WHERE u.legajo = $1",
+      "SELECT u.*,j.turno,p.permiso FROM users u left join legajos j on u.legajo=j.legajo join permisos p on p.id=j.id_rol WHERE u.legajo = $1",
       [legajo]
     );
 
@@ -84,7 +80,7 @@ router.post("/login", validInfo, async (req, res) => {
       apellido: user.rows[0].apellido,
       telefono: user.rows[0].telefono,
       turno: user.rows[0].turno,
-      rol: user.rows[0].rol,
+      rol: user.rows[0].permiso,
     });
     return res.json(jwtToken);
   } catch (err) {
