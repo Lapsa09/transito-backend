@@ -6,10 +6,10 @@ const router = require("express").Router();
 router.get("/", async (req, res) => {
   try {
     const reportes = await pool.query(
-      "select d.id,d.fecha,h.horario,c.calles,t.nivel,r.id as id_rec,r.tiempo,r.tiempo_hist,r.velocidad,r.velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id inner join waze.nivel_trafico t on r.id_trafico=t.id order by d.fecha desc,r.id_calles asc,h.horario asc"
+      "select d.id,d.fecha,h.horario,c.calles,r.id_trafico,r.id as id_rec,r.tiempo,r.tiempo_hist,r.velocidad,r.velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id order by d.fecha desc,r.id_calles asc,h.horario asc"
     );
     const promedios = await pool.query(
-      "select r.id_calles,h.horario,c.calles,avg(r.id_trafico) as nivel_trafico,avg(r.tiempo) as tiempo,avg(r.tiempo_hist) as tiempo_hist,avg(r.velocidad) as velocidad,avg(r.velocidad_hist) as velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id group by h.horario,c.calles,r.id_calles order by r.id_calles asc,h.horario asc"
+      "select r.id_calles,h.horario,c.calles,case when avg(r.velocidad_hist)-avg(r.velocidad) >1 then ceil(avg(r.id_trafico)) else floor(avg(r.id_trafico)) end as nivel_trafico,avg(r.tiempo) as tiempo,avg(r.tiempo_hist) as tiempo_hist,avg(r.velocidad) as velocidad,avg(r.velocidad_hist) as velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id where extract(day from now() - d.fecha) <=15 group by h.horario,c.calles,r.id_calles order by r.id_calles asc,h.horario asc"
     );
     const response = groupByDay(reportes.rows);
     res.json({ res: response[0], promedio: promedio(promedios.rows) });
@@ -88,7 +88,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const reportes = await pool.query(
-      "select d.id,d.fecha,h.horario,c.calles,t.nivel,r.id as id_rec,r.tiempo,r.tiempo_hist,r.velocidad,r.velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id inner join waze.nivel_trafico t on r.id_trafico=t.id where d.id=$1 order by d.fecha desc,r.id_calles asc,h.horario asc",
+      "select d.id,d.fecha,h.horario,c.calles,r.id_trafico,r.id as id_rec,r.tiempo,r.tiempo_hist,r.velocidad,r.velocidad_hist from waze.reporte re left join waze.dia d on d.id=re.id_dia left join waze.recorrido r on re.id=r.id_reporte inner join waze.horarios h on re.id_horario=h.id inner join waze.calles c on r.id_calles=c.id where d.id=$1 order by d.fecha desc,r.id_calles asc,h.horario asc",
       [id]
     );
     const response = groupByDay(reportes.rows);

@@ -164,7 +164,7 @@ const groupByDay = (data) => {
       busca[d.horario].push({
         id: d.id_rec,
         calles: d.calles,
-        trafico: d.nivel,
+        trafico: d.id_trafico,
         tiempo: d.tiempo,
         tiempo_hist: d.tiempo_hist,
         velocidad: d.velocidad,
@@ -179,7 +179,7 @@ const groupByDay = (data) => {
         {
           id: d.id_rec,
           calles: d.calles,
-          trafico: d.nivel,
+          trafico: d.id_trafico,
           tiempo: d.tiempo,
           tiempo_hist: d.tiempo_hist,
           velocidad: d.velocidad,
@@ -199,7 +199,7 @@ const promedio = (data) => {
     res[d.horario].push({
       id: d.id_calles,
       calles: d.calles,
-      trafico: calles[Math.round(d.nivel_trafico)],
+      trafico: Math.round(d.nivel_trafico),
       tiempo: Math.round(d.tiempo),
       tiempo_hist: Math.round(d.tiempo_hist),
       velocidad: Math.round(d.velocidad),
