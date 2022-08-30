@@ -1,10 +1,6 @@
 const router = require("express").Router();
 const pool = require("../../pool");
-const {
-  groupByInspector,
-  setArrayId,
-  groupByServicio,
-} = require("../../utils/groupResponses");
+const { setArrayId } = require("../../utils/groupResponses");
 const { sorting } = require("../../utils/arrayFormat");
 const { dateFormat } = require("../../utils/dateFormat");
 const sueldos = require("../../middleware/sueldos");
@@ -13,10 +9,10 @@ router.get("/operarios", async (req, res) => {
   try {
     const { _sort, _order, q, m, y } = req.query;
     const operarios = await pool.query(
-      "select os.memo,os.recibo,os.a_cobrar,o.*,s.fecha_recibo,s.fecha_servicio from sueldos.operarios_servicios os inner join sueldos.operarios o on o.legajo=os.legajo inner join sueldos.servicios s on s.id_servicio=os.id_servicio"
+      "select o.legajo,o.nombre as inspector,jsonb_build_object('id',extract(month from s.fecha_servicio),'name',to_char(s.fecha_servicio,'MONTH')) as mes,extract(year from s.fecha_servicio) as año,json_agg(json_build_object('memo',os.memo,'recibo',os.recibo,'fecha_recibo',s.fecha_recibo,'fecha_servicio',s.fecha_servicio,'a_cobrar',os.a_cobrar)) as servicios from sueldos.operarios_servicios os inner join sueldos.operarios o on o.legajo=os.legajo inner join sueldos.servicios s on s.id_servicio=os.id_servicio group by o.legajo,o.nombre,jsonb_build_object('id',extract(month from s.fecha_servicio),'name',to_char(s.fecha_servicio,'MONTH')),extract(year from s.fecha_servicio) order by o.legajo"
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    const response = groupByInspector(operarios.rows)
+    const response = operarios.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
         q
@@ -38,13 +34,11 @@ router.get("/clientes", async (req, res) => {
   try {
     const { _sort, _order, m, y, q } = req.query;
     const clientes = await pool.query(
-      "select s.id_servicio,c.id_cliente,c.cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo from sueldos.clientes c inner join sueldos.servicios s on c.id_cliente=s.id_cliente order by s.id_servicio asc"
+      "select c.id_cliente, jsonb_build_object('id',extract(month from s.fecha_recibo),'name',to_char(s.fecha_recibo,'MONTH')) as mes, extract(year from s.fecha_recibo) as año, upper(c.cliente) as cliente, json_agg(json_build_object('id',s.id_servicio,'recibo',s.recibo,'fecha_recibo',s.fecha_recibo,'importe_recibo', s.importe_recibo,'fecha_servicio', s.fecha_servicio,'importe_servicio', s.importe_servicio,'acopio',s.acopio,'memo',s.memo,'operarios',operarios)) as servicios, sum(s.importe_recibo) as a_deudor,sum(s.acopio) as a_favor from sueldos.clientes c inner join sueldos.servicios s on c.id_cliente=s.id_cliente left join(select id_servicio, json_agg(json_build_object('legajo',o.legajo,'nombre',op.nombre,'a_cobrar',o.a_cobrar)) operarios from sueldos.operarios op left join sueldos.operarios_servicios o on op.legajo = o.legajo group by id_servicio) os on os.id_servicio=s.id_servicio group by c.id_cliente,jsonb_build_object('id',extract(month from s.fecha_recibo),'name',to_char(s.fecha_recibo,'MONTH')),extract(year from s.fecha_recibo) order by año desc"
     );
-    const servicios = await pool.query(
-      "select s.id_servicio,s.recibo,s.fecha_recibo,s.importe_recibo,s.importe_servicio,s.acopio,s.memo,o.legajo,op.nombre,o.a_cobrar from sueldos.servicios s left join sueldos.operarios_servicios o on o.id_servicio=s.id_servicio right join sueldos.operarios op on o.legajo=op.legajo where o.legajo is not null order by s.id_servicio asc"
-    );
+
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    const response = groupByServicio(clientes.rows, servicios.rows)
+    const response = clientes.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) => (!!q ? row.cliente.includes(q.toUpperCase()) : row))
       .filter((row) => (!!m ? row.mes.id == m : row))
