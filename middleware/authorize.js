@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {
   const token = req.header("jwt_token");
 
   if (!token) {
-    return res.status(403).json({ msg: "Acceso denegado" });
+    return res.status(403).json("Acceso denegado");
   }
 
   try {
@@ -14,6 +14,6 @@ module.exports = (req, res, next) => {
     req.user = verify.user;
     next();
   } catch (err) {
-    res.status(401).json({ msg: "Token invalido" });
+    res.status(401).json("Token invalido");
   }
 };
