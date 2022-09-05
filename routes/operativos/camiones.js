@@ -7,7 +7,7 @@ const { dateFormat, timeFormat } = require("../../utils/dateFormat");
 router.get("/", async (req, res) => {
   try {
     const operativos = await pool.query(
-      "select o.fecha,ca.hora,o.turno,o.legajo,o.direccion,loc.barrio as localidad,loc.cp,ca.dominio,ca.origen,ori.barrio as localidad_origen,ca.destino,dest.barrio as localidad_destino,ca.licencia,ca.remito,ca.carga,ca.resolucion,ca.acta,m.motivo,ca.hora_carga,ca.legajo_carga,ca.id from camiones.registros ca inner join camiones.operativos o on ca.id_operativo=o.id_op left join vicente_lopez loc on o.id_localidad=loc.id_barrio left join barrios ori on ca.id_localidad_origen=ori.id_barrio left join barrios dest on ca.id_localidad_destino=dest.id_barrio left join camiones.motivos m on m.id_motivo=ca.id_motivo order by ca.id asc"
+      "select o.fecha,ca.hora,o.turno,o.legajo,o.direccion,loc.barrio as localidad,loc.cp,ca.dominio,ca.origen,ori.barrio as localidad_origen,ca.destino,dest.barrio as localidad_destino,ca.licencia,ca.remito,ca.carga,ca.resolucion,ca.acta,m.motivo,ca.hora_carga,ca.legajo_carga,ca.id from camiones.registros ca inner join camiones.operativos o on ca.id_operativo=o.id_op left join vicente_lopez loc on o.id_localidad=loc.id_barrio left join barrios ori on ca.id_localidad_origen=ori.id_barrio left join barrios dest on ca.id_localidad_destino=dest.id_barrio left join motivos m on m.id_motivo=ca.id_motivo order by ca.id asc"
     );
     res.json(operativos.rows);
   } catch (error) {
