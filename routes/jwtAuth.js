@@ -63,7 +63,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (user.rows.length === 0) {
-      return res.status(401).json("Usuario no encontrado");
+      res.status(401).json("Usuario no encontrado");
     }
 
     const validPassword = await bcrypt.compare(
@@ -72,7 +72,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (!validPassword) {
-      return res.status(401).json("Contraseña incorrecta");
+      res.status(401).json("Contraseña incorrecta");
     }
     const jwtToken = jwtGenerator({
       legajo: user.rows[0].legajo,
