@@ -52,11 +52,10 @@ router.post("/", fetchWaze, async (req, res) => {
     } else {
       for (const calle of calles)
         await pool.query(
-          "update waze.recorrido set id_calles=$1, tiempo=$2, tiempo_hist=$3, velocidad=$4, velocidad_hist=$5, id_trafico=$5 where id_reporte=$6",
+          "update waze.recorrido set id_calles=$1, tiempo=$2, tiempo_hist=$3, velocidad=$4, velocidad_hist=$5, id_trafico=$6 where id_reporte=$7",
           [
             calle.calle,
-            calle,
-            tiempo,
+            calle.tiempo,
             calle.tiempo_hist,
             calle.velocidad,
             calle.velocidad_hist,
