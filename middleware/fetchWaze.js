@@ -60,7 +60,7 @@ module.exports = async (req, res, next) => {
     else {
       const id = await pool.query(
         "insert into waze.dia (fecha) values ($1) returning id",
-        [DateTime.now().toFormat("dd/MM/yyyy")]
+        [DateTime.now().toFormat("MM/dd/yyyy")]
       );
       req.body.fecha = id.rows[0].id;
     }
