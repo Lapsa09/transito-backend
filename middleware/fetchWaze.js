@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
       }));
     req.body.hora = horas(DateTime.now().setLocale("es-AR").hour);
     const repetido = await pool.query("select * from waze.dia where fecha=$1", [
-      DateTime.now().toFormat("dd/MM/yyyy"),
+      DateTime.now().toFormat("MM/dd/yyyy"),
     ]);
     if (repetido.rowCount > 0) req.body.fecha = repetido.rows[0].id;
     else {

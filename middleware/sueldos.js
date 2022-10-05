@@ -2,31 +2,31 @@ const pool = require("../pool");
 
 module.exports = async (req, res, next) => {
   try {
-    const { recibo, importe_servicio, importe_recibo } = req.body;
+    const { importe_recibo, operarios, medio_pago, id_cliente } = req.body;
 
-    const recibos = await pool.query(
-      "select * from sueldos.servicios where recibo=$1 order by fecha_recibo desc",
-      [recibo]
+    req.body.importe_servicio = operarios.reduce((a, b) => a + b.a_cobrar, 0);
+
+    const { importe_servicio } = req.body;
+
+    const query = await pool.query(
+      "select sum(coalesce(importe_recibo,0)-importe_servicio) as acopio from sueldos.servicios where id_cliente=$1",
+      [id_cliente]
     );
 
-    if (recibos.rowCount === 0) {
-      req.body.acopio = importe_recibo - importe_servicio;
-      next();
-    }
+    const [{ acopio }] = query.rows;
 
-    const {
-      rows: [{ acopio }],
-    } = recibos;
-
-    if (importe_servicio > acopio) {
-      res
-        .status(401)
-        .json({ data: "Este recibo no cuenta con suficiente saldo a favor" });
+    if (medio_pago === "recibo") {
+      if (importe_recibo < importe_servicio) {
+        res.status(401).json("El importe del recibo no es suficiente");
+      }
     } else {
-      req.body.acopio = acopio - importe_servicio;
-      next();
+      if (acopio < importe_recibo) {
+        res.status(401).json("No tiene suficiente dinero a favor");
+      }
     }
+    next();
   } catch (error) {
-    res.status(500).json({ data: "Server error" });
+    console.log(error);
+    res.status(500).json("Server error");
   }
 };

@@ -68,13 +68,16 @@ const groupByServicio = (data, servicios) => {
         importe_servicio: parseInt(d.importe_servicio),
         acopio: parseInt(d.acopio),
         operarios: getOperarios(d.id_servicio, servicios),
+        cancelado: getOperarios(d.id_servicio, servicios).every(
+          (operario) => !!operario.cancelado
+        ),
       });
       busca.a_deudor = busca.servicios.reduce(
-        (a, b) => a + parseInt(b.importe_servicio),
+        (a, b) => (b.cancelado ? a : a + parseInt(b.importe_servicio)),
         0
       );
       busca.a_favor = busca.servicios.reduce(
-        (a, b) => a + parseInt(b.acopio),
+        (a, b) => (b.cancelado ? a : a + parseInt(b.acopio)),
         0
       );
     } else {
@@ -97,13 +100,19 @@ const groupByServicio = (data, servicios) => {
           importe_servicio: parseInt(d.importe_servicio),
           acopio: parseInt(d.acopio),
           operarios: getOperarios(d.id_servicio, servicios),
+          cancelado: getOperarios(d.id_servicio, servicios).every(
+            (operario) => !!operario.cancelado
+          ),
         },
       ];
       obj.a_deudor = obj.servicios.reduce(
-        (a, b) => a + parseInt(b.importe_servicio),
+        (a, b) => (b.cancelado ? a : a + parseInt(b.importe_servicio)),
         0
       );
-      obj.a_favor = obj.servicios.reduce((a, b) => a + parseInt(b.acopio), 0);
+      obj.a_favor = obj.servicios.reduce(
+        (a, b) => (b.cancelado ? a : a + parseInt(b.acopio)),
+        0
+      );
       arr.push(obj);
     }
   });
@@ -144,9 +153,11 @@ const getOperarios = (id, data) => {
   const busca = data.filter((d) => id === d.id_servicio);
 
   return busca.map((row) => ({
+    id_servicio: row.id_servicio,
     legajo: row.legajo,
     a_cobrar: row.a_cobrar,
     nombre: row.nombre,
+    cancelado: row.cancelado,
   }));
 };
 
