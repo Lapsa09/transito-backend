@@ -36,30 +36,15 @@ router.get("/operarios", async (req, res) => {
 
 router.get("/clientes", async (req, res) => {
   try {
-    const { _sort, _order, m, y, q, año, cliente, mes, _start, _end } =
-      req.query;
+    const { _sort, _order, q, _start, _end } = req.query;
     const clientes = await pool.query(
-      "select c.id_cliente, jsonb_build_object('id',extract(month from s.fecha_recibo),'name',to_char(s.fecha_recibo,'MONTH')) as mes, extract(year from s.fecha_recibo) as año, upper(c.cliente) as cliente, json_agg(json_build_object('id',s.id_servicio,'recibo',s.recibo,'fecha_recibo',s.fecha_recibo,'importe_recibo', s.importe_recibo,'fecha_servicio', s.fecha_servicio,'importe_servicio', s.importe_servicio,'memo',s.memo,'operarios',operarios)) as servicios, sum(s.importe_recibo)::INTEGER as a_deudor,sum(coalesce(s.importe_recibo,0)-s.importe_servicio)::INTEGER as a_favor from sueldos.clientes c inner join sueldos.servicios s on c.id_cliente=s.id_cliente left join(select id_servicio, json_agg(json_build_object('id_servicio',o.id_servicio,'legajo',o.legajo,'nombre',op.nombre,'a_cobrar',o.a_cobrar,'hora_inicio',o.hora_inicio,'hora_fin',o.hora_fin,'cancelado',o.cancelado)) operarios from sueldos.operarios op left join sueldos.operarios_servicios o on op.legajo = o.legajo group by id_servicio) os on os.id_servicio=s.id_servicio group by c.id_cliente,jsonb_build_object('id',extract(month from s.fecha_recibo),'name',to_char(s.fecha_recibo,'MONTH')),extract(year from s.fecha_recibo) order by año desc"
+      "SELECT C.ID_CLIENTE, UPPER(C.CLIENTE) AS CLIENTE, JSON_AGG(JSON_BUILD_OBJECT('mes',JSONB_BUILD_OBJECT('id', EXTRACT(MONTH FROM S.FECHA_SERVICIO), 'name', TO_CHAR(S.FECHA_SERVICIO,'MONTH')), 'año',EXTRACT(YEAR FROM S.FECHA_SERVICIO), 'servicios',SERVICIOS)) HISTORIAL, SUM(S.IMPORTE_RECIBO)::INTEGER AS A_DEUDOR, SUM(COALESCE(S.IMPORTE_RECIBO,0) - S.IMPORTE_SERVICIO)::INTEGER AS A_FAVOR FROM SUELDOS.CLIENTES C INNER JOIN SUELDOS.SERVICIOS S ON C.ID_CLIENTE = S.ID_CLIENTE LEFT JOIN (SELECT C.ID_CLIENTE,extract(month from s.fecha_servicio) as mes, JSON_AGG(JSON_BUILD_OBJECT('id', S.ID_SERVICIO, 'recibo', S.RECIBO, 'fecha_recibo', S.FECHA_RECIBO, 'importe_recibo', S.IMPORTE_RECIBO, 'fecha_servicio', S.FECHA_SERVICIO, 'importe_servicio', S.IMPORTE_SERVICIO, 'memo', S.MEMO, 'operarios', OPERARIOS)) SERVICIOS FROM SUELDOS.SERVICIOS S JOIN SUELDOS.CLIENTES C ON C.ID_CLIENTE = S.ID_CLIENTE LEFT JOIN (SELECT ID_SERVICIO, JSON_AGG(JSON_BUILD_OBJECT('id_servicio', O.ID_SERVICIO, 'legajo', O.LEGAJO, 'nombre', OP.NOMBRE, 'a_cobrar', O.A_COBRAR, 'hora_inicio', O.HORA_INICIO, 'hora_fin', O.HORA_FIN, 'cancelado', O.CANCELADO)) OPERARIOS FROM SUELDOS.OPERARIOS OP LEFT JOIN SUELDOS.OPERARIOS_SERVICIOS O ON OP.LEGAJO = O.legajo GROUP BY ID_SERVICIO) OS ON OS.ID_SERVICIO = S.ID_SERVICIO GROUP BY 1,2) SC ON SC.ID_CLIENTE = C.ID_CLIENTE and sc.mes=extract(month from s.fecha_servicio) GROUP BY 1"
     );
 
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     const response = clientes.rows
-      .map((record) => ({
-        ...record,
-        servicios: record.servicios.map((servicio) => ({
-          ...servicio,
-          acopio: servicio.importe_recibo - servicio.importe_servicio,
-        })),
-      }))
       .sort((a, b) => sorting(a, b, _order, _sort))
-      .filter((row) => (!!q ? row.cliente.includes(q.toUpperCase()) : row))
-      .filter((row) => (!!m ? row.mes.id == m : row))
-      .filter((row) => (!!y ? row.año == y : row))
-      .filter((row) => (!!año ? row.año == año : row))
-      .filter((row) =>
-        !!cliente ? row.cliente.includes(cliente.toUpperCase()) : row
-      )
-      .filter((row) => (!!mes ? row.mes.id == mes : row));
+      .filter((row) => (!!q ? row.cliente.includes(q.toUpperCase()) : row));
 
     res.set("X-Total-Count", response.length);
     res.json(setArrayId(response).slice(_start, _end));
@@ -234,7 +219,6 @@ router.post("/clientes", sueldos, async (req, res) => {
       fecha_recibo,
       importe_recibo,
       importe_servicio,
-      medio_pago,
     } = req.body;
 
     const servicio = await pool.query(
@@ -242,9 +226,9 @@ router.post("/clientes", sueldos, async (req, res) => {
       [
         id_cliente,
         memo,
-        medio_pago === "recibo" ? recibo : "",
-        medio_pago === "recibo" ? fecha_recibo : "",
-        medio_pago === "recibo" ? importe_recibo : "",
+        recibo || null,
+        fecha_recibo || null,
+        importe_recibo || null,
         fecha_servicio,
         importe_servicio,
         feriado,
