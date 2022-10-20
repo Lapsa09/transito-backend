@@ -21,5 +21,6 @@ app.use("/control/paseo", require("./routes/control/paseo"));
 app.use("/sueldos", require("./routes/sueldos/index"));
 app.use("/auth", require("./routes/jwtAuth"));
 app.use("/waze", require("./routes/waze/index"));
+app.use("/operarios", require("./routes/operarios/index"));
 
 app.listen(port);
