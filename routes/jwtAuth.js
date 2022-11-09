@@ -63,7 +63,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (user.rows.length === 0) {
-      res.status(401).json("Usuario no encontrado");
+      return res.status(401).json("Usuario no encontrado");
     }
 
     const validPassword = await bcrypt.compare(
@@ -72,7 +72,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (!validPassword) {
-      res.status(401).json("Contraseña incorrecta");
+      return res.status(401).json("Contraseña incorrecta");
     }
     const jwtToken = jwtGenerator({
       legajo: user.rows[0].legajo,
@@ -82,7 +82,7 @@ router.post("/login", validInfo, async (req, res) => {
       turno: user.rows[0].turno,
       rol: user.rows[0].permiso,
     });
-    res.json(jwtToken);
+    return res.json(jwtToken);
   } catch (err) {
     console.log(err);
     res.status(500).json("Server error");
