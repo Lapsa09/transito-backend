@@ -82,7 +82,7 @@ router.post("/login", validInfo, async (req, res) => {
       turno: user.rows[0].turno,
       rol: user.rows[0].permiso,
     });
-    return res.json(jwtToken);
+    res.json(jwtToken);
   } catch (err) {
     console.log(err);
     res.status(500).json("Server error");
