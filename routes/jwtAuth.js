@@ -93,6 +93,7 @@ router.post("/verify", authorize, (req, res) => {
   try {
     res.json(true);
   } catch (err) {
+    console.log(err);
     res.status(500).json("Server error");
   }
 });

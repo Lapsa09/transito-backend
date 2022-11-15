@@ -6,6 +6,7 @@ const {
   filterByDate,
   filterByWeekDay,
 } = require("../../middleware/dataFilter");
+const radicacion = require("../../middleware/radicacion");
 
 router.get("/", async (req, res) => {
   try {
@@ -29,7 +30,7 @@ router.get("/zonas", async (req, res) => {
   }
 });
 
-router.post("/", operativoPaseo, async (req, res) => {
+router.post("/", operativoPaseo, radicacion, async (req, res) => {
   const {
     fecha,
     hora,
@@ -58,7 +59,7 @@ router.post("/", operativoPaseo, async (req, res) => {
           resolucion,
           lpcarga,
           getMonth(fecha),
-          localidadInfractor.id_barrio,
+          localidadInfractor,
           id_operativo,
         ]
       );
