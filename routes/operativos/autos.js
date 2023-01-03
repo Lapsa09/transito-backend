@@ -69,7 +69,7 @@ router.post(
             `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
             latitud,
             longitud,
-            tipo_licencia,
+            tipo_licencia.id_tipo,
             zona_infractor.id_barrio,
             id_operativo,
           ]
