@@ -51,7 +51,7 @@ router.post(
         "select dominio,id_operativo from operativos.registros where id_operativo=$1 and dominio=$2",
         [id_operativo, dominio]
       );
-
+      console.log(req.body);
       if (repetido.rows.length === 0) {
         await pool.query(
           "insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)",
