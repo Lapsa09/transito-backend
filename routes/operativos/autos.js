@@ -1,10 +1,10 @@
 const router = require("express").Router();
-const { geocode } = require("../../middleware/geocoding");
+const { geocodeAutos } = require("../../middleware/geocoding");
 const getCP = require("../../middleware/getCP");
 const { alcoholemia, es_del } = require("../../middleware/municipales");
 const { operativoAlcoholemia } = require("../../middleware/operativo");
 const pool = require("../../pool");
-const { timeFormat, getMonth, getWeek } = require("../../utils/dateFormat");
+const { getMonth, getWeek } = require("../../utils/dateFormat");
 
 router.get("/", async (req, res) => {
   try {
@@ -24,7 +24,7 @@ router.post(
   es_del,
   alcoholemia,
   operativoAlcoholemia,
-  geocode,
+  geocodeAutos,
   async (req, res) => {
     try {
       const {

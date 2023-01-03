@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { geocode } = require("../../middleware/geocoding");
+const { geocodeCamiones } = require("../../middleware/geocoding");
 const { operativoCamiones } = require("../../middleware/operativo");
 const pool = require("../../pool");
 const { dateFormat, timeFormat } = require("../../utils/dateFormat");
@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", operativoCamiones, geocode, async (req, res) => {
+router.post("/", operativoCamiones, geocodeCamiones, async (req, res) => {
   try {
     const {
       fecha,
