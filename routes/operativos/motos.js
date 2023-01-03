@@ -54,8 +54,8 @@ router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
         "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning id",
         [
           dominio,
-          licencia,
-          acta,
+          parseInt(licencia) || null,
+          parseInt(acta) || null,
           resolucion,
           lpcarga,
           getMonth(fecha),
