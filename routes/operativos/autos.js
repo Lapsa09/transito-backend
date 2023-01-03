@@ -29,7 +29,6 @@ router.post(
     try {
       const {
         fecha,
-        hora,
         direccion,
         dominio,
         licencia,
@@ -55,9 +54,8 @@ router.post(
 
       if (repetido.rows.length === 0) {
         await pool.query(
-          "insert into operativos.registros(hora,dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
+          "insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)",
           [
-            timeFormat(hora),
             dominio,
             parseInt(licencia) || null,
             acta,
