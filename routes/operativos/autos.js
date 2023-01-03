@@ -24,7 +24,7 @@ router.post(
   es_del,
   alcoholemia,
   operativoAlcoholemia,
-  geocodeAutos,
+  // geocodeAutos,
   async (req, res) => {
     try {
       const {
@@ -58,9 +58,9 @@ router.post(
             dominio,
             parseInt(licencia) || null,
             acta || null,
-            motivo,
+            motivo?.id_motivo || null,
             parseInt(graduacion_alcoholica) || null,
-            resolucion,
+            resolucion || "PREVENCION",
             lpcarga,
             getMonth(fecha),
             getWeek(fecha),
@@ -69,7 +69,7 @@ router.post(
             `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
             latitud,
             longitud,
-            tipo_licencia.id_tipo,
+            tipo_licencia?.id_tipo || null,
             zona_infractor.id_barrio,
             id_operativo,
           ]

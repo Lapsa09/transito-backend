@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", operativoCamiones, geocodeCamiones, async (req, res) => {
+router.post("/", operativoCamiones, async (req, res) => {
   try {
     const {
       fecha,
@@ -34,8 +34,8 @@ router.post("/", operativoCamiones, geocodeCamiones, async (req, res) => {
       motivo,
       lpcarga,
       id_operativo,
-      latitud,
-      longitud,
+      latitud = "",
+      longitud = "",
     } = req.body;
 
     const repetido = await pool.query(
@@ -56,9 +56,9 @@ router.post("/", operativoCamiones, geocodeCamiones, async (req, res) => {
           licencia,
           remito,
           carga,
-          resolucion,
+          resolucion || "PREVENCION",
           acta,
-          motivo,
+          motivo?.id_motivo || null,
           lpcarga,
           id_operativo,
           latitud,

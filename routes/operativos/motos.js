@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
+router.post("/", operativoMotos, async (req, res) => {
   try {
     const {
       fecha,
@@ -43,8 +43,6 @@ router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
       id_operativo,
     } = req.body;
 
-    console.log(req.body);
-
     const repetido = await pool.query(
       "select dominio,id_operativo from motos.registros where id_operativo=$1 and dominio=$2",
       [id_operativo, dominio]
@@ -56,20 +54,20 @@ router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
           dominio,
           parseInt(licencia) || null,
           parseInt(acta) || null,
-          resolucion,
+          resolucion || "PREVENCION",
           lpcarga,
           getMonth(fecha),
           getWeek(fecha),
           `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
-          tipo_licencia || null,
+          tipo_licencia?.id_tipo || null,
           zona_infractor.id_barrio,
           id_operativo,
         ]
       );
-      for (const { motivo } in motivos) {
+      for (const motivo in motivos) {
         await pool.query(
           "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
-          [id_v.rows[0].id, motivo]
+          [id_v.rows[0].id, motivos[motivo].id_motivo]
         );
       }
       res.json("Success");
