@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const { geocodeMotos } = require("../../middleware/geocoding");
-const getCP = require("../../middleware/getCP");
 const { operativoMotos } = require("../../middleware/operativo");
 const pool = require("../../pool");
 const { getMonth, getWeek } = require("../../utils/dateFormat");
@@ -27,7 +26,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", getCP, geocodeMotos, operativoMotos, async (req, res) => {
+router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
   try {
     const {
       fecha,

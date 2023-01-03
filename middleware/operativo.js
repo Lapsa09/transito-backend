@@ -136,12 +136,11 @@ const operativoMotos = async (req, res, next) => {
     turno,
     seguridad,
     zona,
-    cp,
   } = req.body;
 
   try {
     const op = await pool.query(
-      "select id_op from motos.operativos where fecha=$1 and hora=$2 and qth=$3 and legajo_a_cargo=$4 and legajo_planilla=$5 and turno=$6 and seguridad=$7 and id_zona=$8 and cp=$9",
+      "select id_op from motos.operativos where fecha=$1 and hora=$2 and qth=$3 and legajo_a_cargo=$4 and legajo_planilla=$5 and turno=$6 and seguridad=$7 and id_zona=$8",
       [
         dateFormat(fecha),
         timeFormat(hora),
@@ -151,13 +150,12 @@ const operativoMotos = async (req, res, next) => {
         turno,
         seguridad,
         zona,
-        cp,
       ]
     );
 
     if (op.rows.length === 0) {
       const id_op = await pool.query(
-        "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona,cp) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
+        "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona) values($1,$2,$3,$4,$5,$6,$7,$8) returning id_op",
         [
           dateFormat(fecha),
           timeFormat(hora),
@@ -167,7 +165,6 @@ const operativoMotos = async (req, res, next) => {
           turno,
           seguridad,
           zona,
-          cp,
         ]
       );
 
