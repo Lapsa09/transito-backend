@@ -61,7 +61,7 @@ router.post("/", geocodeMotos, operativoMotos, async (req, res) => {
           getMonth(fecha),
           getWeek(fecha),
           `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
-          tipo_licencia,
+          tipo_licencia || null,
           zona_infractor.id_barrio,
           id_operativo,
         ]
