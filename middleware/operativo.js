@@ -21,7 +21,7 @@ const operativoAlcoholemia = async (req, res, next) => {
       turno,
       legajo_a_cargo,
       legajo_planilla,
-      zona,
+      zona.id_barrio,
       seguridad,
       timeFormat(hora),
     ]
@@ -36,7 +36,7 @@ const operativoAlcoholemia = async (req, res, next) => {
         turno,
         legajo_a_cargo,
         legajo_planilla,
-        zona,
+        zona.id_barrio,
         seguridad,
         timeFormat(hora),
       ]
@@ -56,13 +56,13 @@ const operativoCamiones = async (req, res, next) => {
   try {
     const op = await pool.query(
       "select id_op from camiones.operativos where fecha=$1 and turno=$2 and legajo=$3 and direccion=$4 and id_localidad=$5",
-      [dateFormat(fecha), turno, legajo, direccion, zona]
+      [dateFormat(fecha), turno, legajo, direccion, zona.id_barrio]
     );
 
     if (op.rows.length === 0) {
       const id_op = await pool.query(
         "insert into camiones.operativos(fecha,turno,legajo,direccion,id_localidad) values($1,$2,$3,$4,$5) returning id_op",
-        [dateFormat(fecha), turno, legajo, direccion, zona]
+        [dateFormat(fecha), turno, legajo, direccion, zona.id_barrio]
       );
 
       req.body.id_operativo = id_op.rows[0].id_op;
@@ -149,7 +149,7 @@ const operativoMotos = async (req, res, next) => {
         legajo_planilla,
         turno,
         seguridad,
-        zona,
+        zona.id_barrio,
       ]
     );
 
@@ -164,7 +164,7 @@ const operativoMotos = async (req, res, next) => {
           legajo_planilla,
           turno,
           seguridad,
-          zona,
+          zona.id_barrio,
         ]
       );
 

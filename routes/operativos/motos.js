@@ -38,7 +38,7 @@ router.post("/", operativoMotos, async (req, res) => {
       lpcarga,
       tipo_licencia,
       zona_infractor,
-      cp,
+      zona,
       direccion,
       id_operativo,
     } = req.body;
@@ -58,17 +58,19 @@ router.post("/", operativoMotos, async (req, res) => {
           lpcarga,
           getMonth(fecha),
           getWeek(fecha),
-          `${direccion}, ${cp}, Vicente Lopez, Buenos Aires, Argentina`,
+          `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
           tipo_licencia?.id_tipo || null,
           zona_infractor.id_barrio,
           id_operativo,
         ]
       );
-      for (const motivo in motivos) {
-        await pool.query(
-          "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
-          [id_v.rows[0].id, motivos[motivo].id_motivo]
-        );
+      if (motivos.length > 0) {
+        for (const motivo in motivos) {
+          await pool.query(
+            "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
+            [id_v.rows[0].id, motivos[motivo].id_motivo]
+          );
+        }
       }
       res.json("Success");
     } else {
