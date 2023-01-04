@@ -7,7 +7,7 @@ const pool = require("../../pool");
 router.get("/", async (req, res) => {
   try {
     const operativos = await pool.query(
-      "select o.fecha,r.hora,o.qth,z.barrio,z.cp,o.legajo_a_cargo,o.legajo_planilla,o.turno,o.seguridad,r.dominio,r.licencia,l.tipo as tipo_licencia,l.vehiculo as tipo_vehiculo,zi.barrio as zona_infractor,r.acta,m.motivo,r.graduacion_alcoholica,r.resolucion,r.fechacarga,r.lpcarga,r.mes,r.semana,r.es_del,r.resultado,r.id from operativos.registros r inner join operativos.operativos o on o.id_op=r.id_operativo left join tipo_licencias l on r.id_licencia=l.id_tipo left join vicente_lopez z on o.id_localidad=z.id_barrio left join barrios zi on r.id_zona_infractor=zi.id_barrio left join motivos m on m.id_motivo=r.id_motivo order by r.id asc"
+      "select o.fecha,o.hora,o.qth,z.barrio,z.cp,o.legajo_a_cargo,o.legajo_planilla,o.turno,o.seguridad,r.dominio,r.licencia,l.tipo as tipo_licencia,l.vehiculo as tipo_vehiculo,zi.barrio as zona_infractor,r.acta,m.motivo,r.graduacion_alcoholica,r.resolucion,r.fechacarga,r.lpcarga,r.mes,r.semana,r.es_del,r.resultado,r.id from operativos.registros r inner join operativos.operativos o on o.id_op=r.id_operativo left join tipo_licencias l on r.id_licencia=l.id_tipo left join vicente_lopez z on o.id_localidad=z.id_barrio left join barrios zi on r.id_zona_infractor=zi.id_barrio left join motivos m on m.id_motivo=r.id_motivo order by r.id asc"
     );
     res.json(operativos.rows);
   } catch (error) {
