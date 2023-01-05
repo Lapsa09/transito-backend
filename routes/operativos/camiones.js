@@ -32,8 +32,8 @@ router.post("/", operativoCamiones, async (req, res) => {
       motivo,
       lpcarga,
       id_operativo,
-      latitud = "",
-      longitud = "",
+      latitud = null,
+      longitud = null,
       direccion,
       zona,
     } = req.body;
