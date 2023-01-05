@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { operativoCamiones } = require("../../middleware/operativo");
-const { dateFormat, timeFormat } = require("../../utils/dateFormat");
+const { timeFormat } = require("../../utils/dateFormat");
 const pool = require("../../pool");
 
 router.get("/", async (req, res) => {
@@ -18,7 +18,6 @@ router.get("/", async (req, res) => {
 router.post("/", operativoCamiones, async (req, res) => {
   try {
     const {
-      fecha,
       hora,
       dominio,
       origen,
@@ -40,8 +39,8 @@ router.post("/", operativoCamiones, async (req, res) => {
     } = req.body;
 
     const repetido = await pool.query(
-      "select ca.dominio,o.fecha from camiones.registros ca inner join camiones.operativos o on o.id_op=ca.id_operativo where o.fecha=$1 and ca.dominio=$2",
-      [dateFormat(fecha), dominio]
+      "select dominio, id_operativo from camiones.registros where id_operativo=$1 and dominio=$2",
+      [id_operativo, dominio]
     );
 
     if (repetido.rows.length === 0) {
