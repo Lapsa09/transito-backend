@@ -13,7 +13,7 @@ def getLocation(dominio):
         "Accept-Language": "es-US,es-419;q=0.9,es;q=0.8,en;q=0.7",
         "Cache-Control": "max-age=0",
         "Connection": "keep-alive",
-        "Content-Length": "14",
+        "Content-Length": "33",
         "Content-Type": "application/x-www-form-urlencoded",
         "Host": "www.dnrpa.gov.ar",
         "Origin": "https://www.dnrpa.gov.ar",
@@ -23,10 +23,10 @@ def getLocation(dominio):
         "Sec-Fetch-Site": "same-origin",
         "Sec-Fetch-User": "?1",
         "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
-        "sec-ch-ua": '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "sec-ch-ua": '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
         "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"Windows"'
+        "sec-ch-ua-platform": "Windows"
     }
 
     response = requests.post(url, data=payload, headers=headers)
