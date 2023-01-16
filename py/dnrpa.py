@@ -33,7 +33,7 @@ def getLocation(dominio):
 
     scrape = BeautifulSoup(response.text, "html.parser")
 
-    secs = scrape.find_all("table")[3]
+    secs = scrape.find_all("table")[2]
     fonts = secs.find_all("font")
     localidad = fonts[1].text.strip()
     provincia = fonts[3].text.strip()
