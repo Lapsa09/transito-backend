@@ -123,26 +123,20 @@ const groupByMemo = (data) => {
   const arr = [];
 
   data.forEach((d) => {
-    const busca = arr.find((a) => a.memo === d.memo);
+    const busca = arr.find((a) => a.id === d.id);
     if (busca) {
       busca.operarios.push({
-        legajo: d.legajo,
-        a_cobrar: d.a_cobrar,
-        nombre: d.nombre,
+        ...d,
       });
     } else {
       const obj = {
-        id: d.id_servicio,
+        ...d,
         recibo: parseInt(d.recibo),
-        fecha_recibo: d.fecha_recibo,
         importe_recibo: parseInt(d.importe_recibo),
         importe_servicio: parseInt(d.importe_servicio),
-        memo: d.memo,
         acopio: parseInt(d.acopio),
       };
-      obj.operarios = [
-        { legajo: d.legajo, a_cobrar: parseInt(d.a_cobrar), nombre: d.nombre },
-      ];
+      obj.operarios = [{ ...d, a_cobrar: parseInt(d.a_cobrar) }];
       arr.push(obj);
     }
   });

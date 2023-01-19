@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const pool = require("../../pool");
-const { setArrayId } = require("../../utils/groupResponses");
+const { setArrayId, groupByMemo } = require("../../utils/groupResponses");
 const { sorting } = require("../../utils/arrayFormat");
 const { dateFormat, timeFormat } = require("../../utils/dateFormat");
 const sueldos = require("../../middleware/sueldos");
@@ -145,10 +145,10 @@ router.get("/liqui", async (req, res) => {
 
   try {
     const servicios = await pool.query(
-      "select concat(to_char(s.fecha_servicio, 'month'), extract(year from s.fecha_servicio)) as id, jsonb_build_object('id', extract(month from s.fecha_servicio), 'name', to_char(s.fecha_servicio, 'MONTH')) as mes, extract(year from s.fecha_servicio) as año, json_agg(json_build_object('id_servicio', s.id_servicio, 'cliente', c.cliente, 'recibo', s.recibo, 'fecha_recibo', s.fecha_recibo, 'importe_recibo', s.importe_recibo, 'fecha_servicio', s.fecha_servicio, 'importe_servicio', s.importe_servicio, 'memo', s.memo, 'operarios', operarios)) as servicios from sueldos.clientes c join sueldos.servicios s on c.id_cliente = s.id_cliente left join (select id_servicio, json_agg(json_build_object('id_servicio', o.id_servicio, 'legajo', o.legajo, 'nombre', op.nombre, 'a_cobrar', o.a_cobrar, 'hora_inicio', o.hora_inicio, 'hora_fin', o.hora_fin, 'cancelado', o.cancelado)) operarios from sueldos.operarios op left join sueldos.operarios_servicios o on op.legajo = o.legajo group by id_servicio) os on os.id_servicio = s.id_servicio group by 1,2,3 order by 3 desc, 2 asc"
+      "select concat(to_char(s.fecha_servicio, 'month'), extract(year from s.fecha_servicio)) as id,jsonb_build_object('id', extract(month from s.fecha_servicio), 'name', to_char(s.fecha_servicio, 'MONTH')) as mes, extract(year from s.fecha_servicio) as año, c.*,s.*,o.*,os.* from sueldos.operarios_servicios os join sueldos.operarios o on o.legajo = os.legajo join sueldos.servicios s on s.id_servicio = os.id_servicio join sueldos.clientes c on c.id_cliente = s.id_cliente order by s.memo asc"
     );
 
-    const result = servicios.rows
+    const result = groupByMemo(servicios.rows)
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) => (!!y ? row.año == y : row))
       .filter((row) => (!!m ? row.mes.id == m : row));
