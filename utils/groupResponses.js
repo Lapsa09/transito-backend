@@ -1,4 +1,10 @@
-const { getMonthName, getYear, getMonthJS } = require("./dateFormat");
+const {
+  getMonthName,
+  getYear,
+  getMonthJS,
+  dateFormat,
+  dateFormatJS,
+} = require("./dateFormat");
 const groupByInspector = (data) => {
   const arr = [];
   data.forEach((d) => {
@@ -128,7 +134,7 @@ const groupByMemo = (data) => {
         id_servicio: +row.id_servicio,
         memo: row.memo,
         recibo: +row.recibo,
-        fecha_recibo: row.fecha_recibo.toLocaleDateString(),
+        fecha_recibo: dateFormatJS(row.fecha_recibo),
         importe_recibo: +row.importe_recibo,
         importe_servicio: +row.importe_servicio,
         acopio: +row.acopio,
@@ -148,7 +154,7 @@ const groupByMemo = (data) => {
           id_servicio: +row.id_servicio,
           memo: row.memo,
           recibo: +row.recibo,
-          fecha_recibo: row.fecha_recibo.toLocaleDateString(),
+          fecha_recibo: dateFormatJS(row.fecha_recibo),
           importe_recibo: +row.importe_recibo,
           importe_servicio: +row.importe_servicio,
           acopio: +row.acopio,
