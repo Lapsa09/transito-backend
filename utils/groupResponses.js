@@ -120,26 +120,47 @@ const groupByServicio = (data, servicios) => {
 };
 
 const groupByMemo = (data) => {
-  const arr = [];
-
-  data.forEach((d) => {
-    const busca = arr.find((a) => a.id === d.id);
+  const arr = data.reduce((acc, row) => {
+    const busca = acc.find((a) => a.id === row.id);
     if (busca) {
-      busca.operarios.push({
-        ...d,
+      busca.servicios ??= [];
+      busca.servicios.push({
+        id_servicio: +row.id_servicio,
+        memo: row.memo,
+        recibo: +row.recibo,
+        fecha_recibo: row.fecha_recibo,
+        importe_recibo: +row.importe_recibo,
+        importe_servicio: +row.importe_servicio,
+        acopio: +row.acopio,
+        legajo: +row.legajo,
+        nombre: row.nombre,
+        a_cobrar: +row.a_cobrar,
       });
+      return acc;
     } else {
       const obj = {
-        ...d,
-        recibo: parseInt(d.recibo),
-        importe_recibo: parseInt(d.importe_recibo),
-        importe_servicio: parseInt(d.importe_servicio),
-        acopio: parseInt(d.acopio),
+        id: row.id,
+        mes: row.mes,
+        año: row.año,
       };
-      obj.operarios = [{ ...d, a_cobrar: parseInt(d.a_cobrar) }];
-      arr.push(obj);
+      obj.servicios = [
+        {
+          id_servicio: +row.id_servicio,
+          memo: row.memo,
+          recibo: +row.recibo,
+          fecha_recibo: row.fecha_recibo,
+          importe_recibo: +row.importe_recibo,
+          importe_servicio: +row.importe_servicio,
+          acopio: +row.acopio,
+          legajo: +row.legajo,
+          nombre: row.nombre,
+          a_cobrar: +row.a_cobrar,
+        },
+      ];
+      return acc.concat(obj);
     }
-  });
+  }, []);
+
   return arr;
 };
 
