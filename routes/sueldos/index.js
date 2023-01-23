@@ -124,7 +124,7 @@ router.get("/operarios/list", async (req, res) => {
 
 router.get("/servicios", async (req, res) => {
   try {
-    const { _sort, _order, d, _start, _end } = req.query;
+    const { _sort, _order, d, _start, _end, m, y } = req.query;
     const servicios = await pool.query(
       "select s.id_servicio as id,c.cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo,json_agg(json_build_object('id_servicio',o.id_servicio,'legajo',o.legajo,'nombre',op.nombre,'a_cobrar',o.a_cobrar,'hora_inicio',o.hora_inicio,'hora_fin',o.hora_fin,'cancelado',o.cancelado)) as operarios from sueldos.servicios s left join sueldos.operarios_servicios o on o.id_servicio=s.id_servicio left join sueldos.clientes c on c.id_cliente=s.id_cliente left join sueldos.operarios op on o.legajo=op.legajo group by s.id_servicio,c.cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo order by s.fecha_servicio asc"
     );
@@ -137,7 +137,9 @@ router.get("/servicios", async (req, res) => {
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
         !!d ? dateFormatJS(row.fecha_servicio) === dateFormat(d) : row
-      );
+      )
+      .filter((row) => (!!m ? row.fecha_servicio.getMonth() === m : row))
+      .filter((row) => (!!y ? row.fecha_servicio.getFullYear() === y : row));
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", result.length);
 
