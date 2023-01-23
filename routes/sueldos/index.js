@@ -60,7 +60,7 @@ router.get("/clientes", async (req, res) => {
 
 router.get("/filters/months", async (req, res) => {
   const meses = await pool.query(
-    "select extract(month from s.fecha_recibo) as id,to_char(s.fecha_recibo,'MONTH') as name from sueldos.servicios s group by 1,2 order by 1 asc"
+    "select extract(month from s.fecha_servicio) as id,to_char(s.fecha_servicio,'MONTH') as name from sueldos.servicios s group by 1,2 order by 1 asc"
   );
 
   res.header("Access-Control-Expose-Headers", "X-Total-Count");
@@ -71,7 +71,7 @@ router.get("/filters/months", async (req, res) => {
 
 router.get("/filters/years", async (req, res) => {
   const años = await pool.query(
-    "select extract(year from s.fecha_recibo) as id,extract(year from s.fecha_recibo) as name from sueldos.servicios s group by 1,2 order by 1 desc"
+    "select extract(year from s.fecha_servicio) as id,extract(year from s.fecha_servicio) as name from sueldos.servicios s group by 1,2 order by 1 desc"
   );
 
   res.header("Access-Control-Expose-Headers", "X-Total-Count");
