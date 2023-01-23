@@ -2,11 +2,7 @@ const router = require("express").Router();
 const pool = require("../../pool");
 const { setArrayId, groupByMemo } = require("../../utils/groupResponses");
 const { sorting } = require("../../utils/arrayFormat");
-const {
-  dateFormat,
-  timeFormat,
-  sqlDateFormat,
-} = require("../../utils/dateFormat");
+const { dateFormat, timeFormat } = require("../../utils/dateFormat");
 const sueldos = require("../../middleware/sueldos");
 
 router.get("/operarios", async (req, res) => {
@@ -136,7 +132,7 @@ router.get("/servicios", async (req, res) => {
       }))
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
-        !!d ? sqlDateFormat(row.fecha_servicio) === dateFormat(d) : row
+        !!d ? dateFormat(row.fecha_servicio) === dateFormat(d) : row
       );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", result.length);
