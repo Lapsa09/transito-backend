@@ -138,8 +138,8 @@ router.get("/servicios", async (req, res) => {
       .filter((row) =>
         !!d ? dateFormatJS(row.fecha_servicio) === dateFormat(d) : row
       )
-      .filter((row) => (!!m ? row.fecha_servicio.getMonth() === m : row))
-      .filter((row) => (!!y ? row.fecha_servicio.getFullYear() === y : row));
+      .filter((row) => (!!m ? row.fecha_servicio.getMonth() == m : row))
+      .filter((row) => (!!y ? row.fecha_servicio.getFullYear() == y : row));
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", result.length);
 
