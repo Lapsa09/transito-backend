@@ -5,6 +5,16 @@ const dateFormat = (fecha) =>
     zone: "America/Argentina/Buenos_Aires",
   }).toFormat("dd/MM/yyyy");
 
+const sqlDateFormat = (fecha) =>
+  DateTime.fromISO(fecha, {
+    zone: "America/Argentina/Buenos_Aires",
+  }).toSQLDate();
+
+const sqlTimeFormat = (hora) =>
+  DateTime.fromISO(hora, {
+    zone: "America/Argentina/Buenos_Aires",
+  }).toSQLTime();
+
 const timeFormat = (hora) =>
   DateTime.fromISO(hora, {
     zone: "America/Argentina/Buenos_Aires",
@@ -33,4 +43,6 @@ module.exports = {
   getYear,
   getMonthJS,
   dateFormatJS,
+  sqlDateFormat,
+  sqlTimeFormat,
 };

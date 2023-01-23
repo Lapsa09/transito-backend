@@ -1,4 +1,4 @@
-const { dateFormat, timeFormat } = require("../utils/dateFormat");
+const { sqlDateFormat, sqlTimeFormat } = require("../utils/dateFormat");
 const pool = require("../pool");
 
 const operativoAlcoholemia = async (req, res, next) => {
@@ -16,14 +16,14 @@ const operativoAlcoholemia = async (req, res, next) => {
   const op = await pool.query(
     "select id_op from operativos.operativos where fecha=$1 and qth=$2 and turno=$3 and legajo_a_cargo=$4 and legajo_planilla=$5 and id_localidad=$6 and seguridad=$7 and hora=$8 and direccion_full=$9",
     [
-      dateFormat(fecha),
+      sqlDateFormat(fecha),
       direccion,
       turno,
       legajo_a_cargo,
       legajo_planilla,
       zona.id_barrio,
       seguridad,
-      timeFormat(hora),
+      sqlTimeFormat(hora),
       `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
     ]
   );
@@ -32,14 +32,14 @@ const operativoAlcoholemia = async (req, res, next) => {
     const id_op = await pool.query(
       "insert into operativos.operativos(fecha,qth,turno,legajo_a_cargo,legajo_planilla,id_localidad,seguridad,hora,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
       [
-        dateFormat(fecha),
+        sqlDateFormat(fecha),
         direccion,
         turno,
         legajo_a_cargo,
         legajo_planilla,
         zona.id_barrio,
         seguridad,
-        timeFormat(hora),
+        sqlTimeFormat(hora),
         `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
       ]
     );
@@ -59,7 +59,7 @@ const operativoCamiones = async (req, res, next) => {
     const op = await pool.query(
       "select id_op from camiones.operativos where fecha=$1 and turno=$2 and legajo=$3 and direccion=$4 and id_localidad=$5 and direccion_full=$6",
       [
-        dateFormat(fecha),
+        sqlDateFormat(fecha),
         turno,
         legajo,
         direccion,
@@ -72,7 +72,7 @@ const operativoCamiones = async (req, res, next) => {
       const id_op = await pool.query(
         "insert into camiones.operativos(fecha,turno,legajo,direccion,id_localidad,direccion_full) values($1,$2,$3,$4,$5,$6) returning id_op",
         [
-          dateFormat(fecha),
+          sqlDateFormat(fecha),
           turno,
           legajo,
           direccion,
@@ -99,13 +99,13 @@ const operativoDiario = async (req, res, next) => {
   try {
     const op = await pool.query(
       "select id_op from control_diario.operativos where fecha=$1 and turno=$2 and legajo_planilla=$3",
-      [dateFormat(fecha), turno, lp]
+      [sqlDateFormat(fecha), turno, lp]
     );
 
     if (op.rows.length === 0) {
       const id_op = await pool.query(
         "insert into control_diario.operativos(fecha,turno,legajo_planilla) values($1,$2,$3) returning id_op",
-        [dateFormat(fecha), turno, lp]
+        [sqlDateFormat(fecha), turno, lp]
       );
 
       req.body.id_operativo = id_op.rows[0].id_op;
@@ -125,13 +125,13 @@ const operativoPaseo = async (req, res, next) => {
 
   const op = await pool.query(
     "select id_op from nuevo_control.operativos where fecha=$1 and turno=$2 and lp=$3 and motivo=$4",
-    [dateFormat(fecha), turno, lp, motivo]
+    [sqlDateFormat(fecha), turno, lp, motivo]
   );
 
   if (op.rows.length === 0) {
     const id_op = await pool.query(
       "insert into nuevo_control.operativos(fecha,turno,lp,motivo) values($1,$2,$3,$4) returning id_op",
-      [dateFormat(fecha), turno, lp, motivo]
+      [sqlDateFormat(fecha), turno, lp, motivo]
     );
 
     req.body.id_operativo = id_op.rows[0].id_op;
@@ -158,8 +158,8 @@ const operativoMotos = async (req, res, next) => {
     const op = await pool.query(
       "select id_op from motos.operativos where fecha=$1 and hora=$2 and qth=$3 and legajo_a_cargo=$4 and legajo_planilla=$5 and turno=$6 and seguridad=$7 and id_zona=$8 and direccion_full=$9",
       [
-        dateFormat(fecha),
-        timeFormat(hora),
+        sqlDateFormat(fecha),
+        sqlTimeFormat(hora),
         direccion,
         legajo_a_cargo,
         legajo_planilla,
@@ -174,8 +174,8 @@ const operativoMotos = async (req, res, next) => {
       const id_op = await pool.query(
         "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
         [
-          dateFormat(fecha),
-          timeFormat(hora),
+          sqlDateFormat(fecha),
+          sqlTimeFormat(hora),
           direccion,
           legajo_a_cargo,
           legajo_planilla,
