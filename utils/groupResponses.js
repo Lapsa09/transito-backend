@@ -141,6 +141,7 @@ const groupByMemo = (data) => {
         legajo: +row.legajo,
         nombre: row.nombre,
         a_cobrar: +row.a_cobrar,
+        cancelado: row.cancelado,
       });
       return acc;
     } else {
@@ -161,6 +162,7 @@ const groupByMemo = (data) => {
           legajo: +row.legajo,
           nombre: row.nombre,
           a_cobrar: +row.a_cobrar,
+          cancelado: row.cancelado,
         },
       ];
       return acc.concat(obj);

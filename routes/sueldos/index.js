@@ -77,9 +77,11 @@ router.get("/filters/years", async (req, res) => {
 });
 
 router.get("/clientes/list", async (req, res) => {
+  const { q } = req.query;
   try {
     const clientes = await pool.query(
-      "select * from sueldos.clientes order by id_cliente asc"
+      "select * from sueldos.clientes where cliente like %$1% order by id_cliente asc",
+      [q]
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", clientes.rows.length);
@@ -96,9 +98,11 @@ router.get("/clientes/list", async (req, res) => {
 });
 
 router.get("/operarios/list", async (req, res) => {
+  const { q } = req.query;
   try {
     const operarios = await pool.query(
-      "select * from sueldos.operarios order by nombre asc"
+      "select * from sueldos.operarios where legajo like %$1% or nombre like %$1% order by nombre asc",
+      [q]
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", operarios.rows.length);
@@ -128,7 +132,7 @@ router.get("/servicios", async (req, res) => {
       }))
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
-        !!d ? row.fecha_servicio.toLocaleDateString() === dateFormat(d) : row
+        !!d ? dateFormat(row.fecha_servicio) === dateFormat(d) : row
       );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", result.length);
@@ -177,6 +181,25 @@ router.get("/recibos/:id", async (req, res) => {
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", list.rows.length);
 
+    res.json(list.rows);
+  }
+});
+
+router.get("/memos/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (id === "none") {
+    res.header("Access-Control-Expose-Headers", "X-Total-Count");
+    res.set("X-Total-Count", 0);
+    res.json([]);
+  } else {
+    const list = await pool.query(
+      "select memo,fecha_servicio from sueldos.servicios where id_cliente=$1",
+      [id]
+    );
+
+    res.header("Access-Control-Expose-Headers", "X-Total-Count");
+    res.set("X-Total-Count", list.rowCount);
     res.json(list.rows);
   }
 });
@@ -299,7 +322,7 @@ router.put("/clientes/:id", async (req, res) => {
     } = req.body;
 
     const servicio = await pool.query(
-      "update sueldos.servicios set id_cliente=$1,memo=$2,recibo=$3,fecha_recibo=$4,importe_recibo=$5,fecha_servicio=$6,importe_servicio=$7,feriado=$8,acopio=$9 where id_servicio=$10 returning id_cliente as id_servicio as id,*",
+      "update sueldos.servicios set id_cliente=$1,memo=$2,recibo=$3,fecha_recibo=$4,importe_recibo=$5,fecha_servicio=$6,importe_servicio=$7,feriado=$8,acopio=$9 where id_servicio=$10 returning id_servicio as id,*",
       [
         id_cliente,
         memo,
