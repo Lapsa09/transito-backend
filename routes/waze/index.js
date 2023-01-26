@@ -1,7 +1,7 @@
-const fetchWaze = require("../../middleware/fetchWaze");
 const pool = require("../../pool");
-const { groupByDay, promedio } = require("../../utils/groupResponses");
 const router = require("express").Router();
+const { fetchWaze } = require("../../middleware");
+const { groupByDay, promedio } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {

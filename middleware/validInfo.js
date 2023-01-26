@@ -1,4 +1,4 @@
-module.exports = (req, res, next) => {
+const validInfo = (req, res, next) => {
   const { legajo, nombre, apellido, password, telefono, confirmPassword } =
     req.body;
 
@@ -58,3 +58,5 @@ module.exports = (req, res, next) => {
 
   next();
 };
+
+module.exports = { validInfo };

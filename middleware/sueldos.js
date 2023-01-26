@@ -1,6 +1,6 @@
 const pool = require("../pool");
 
-module.exports = async (req, res, next) => {
+const sueldos = async (req, res, next) => {
   try {
     const { importe_recibo, operarios, medio_pago, id_cliente } = req.body;
 
@@ -30,3 +30,5 @@ module.exports = async (req, res, next) => {
     res.status(500).json("Server error");
   }
 };
+
+module.exports = { sueldos };

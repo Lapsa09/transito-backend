@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const { operativoCamiones } = require("../../middleware/operativo");
-const { timeFormat } = require("../../utils/dateFormat");
 const pool = require("../../pool");
+const { operativoCamiones } = require("../../middleware");
+const { timeFormat } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {

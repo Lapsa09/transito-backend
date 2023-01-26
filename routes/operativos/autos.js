@@ -1,8 +1,11 @@
 const router = require("express").Router();
-const { alcoholemia, es_del } = require("../../middleware/municipales");
-const { operativoAlcoholemia } = require("../../middleware/operativo");
-const { getMonth, getWeek } = require("../../utils/dateFormat");
 const pool = require("../../pool");
+const {
+  alcoholemia,
+  es_del,
+  operativoAlcoholemia,
+} = require("../../middleware");
+const { getMonth, getWeek } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {

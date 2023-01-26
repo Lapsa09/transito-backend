@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const pool = require("../../pool");
-const { operativoDiario } = require("../../middleware/operativo");
-const { timeFormat, getMonth } = require("../../utils/dateFormat");
+const { operativoDiario } = require("../../middleware");
+const { timeFormat, getMonth } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {

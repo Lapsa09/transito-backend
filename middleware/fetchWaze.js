@@ -36,7 +36,7 @@ const get_speed = (secs, mts) => {
   return Math.round(meters_to_kms(mts) / seconds_to_hrs(secs));
 };
 
-module.exports = async (req, res, next) => {
+const fetchWaze = async (req, res, next) => {
   try {
     const {
       data: { routes },
@@ -70,3 +70,5 @@ module.exports = async (req, res, next) => {
     res.status(500).json("Server error");
   }
 };
+
+module.exports = { fetchWaze };

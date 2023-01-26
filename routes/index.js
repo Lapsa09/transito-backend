@@ -1,6 +1,12 @@
 const router = require("express").Router();
 const pool = require("../pool");
-const { geoLocation } = require("../utils/geoLocation");
+const { geoLocateTable } = require("../utils");
+
+router.use("/operativos", require("./operativos"));
+router.use("/control", require("./control"));
+router.use("/sueldos", require("./sueldos"));
+router.use("/auth", require("./jwtAuth"));
+router.use("/waze", require("./waze"));
 
 router.get("/api/:type", async (req, res) => {
   try {
@@ -63,83 +69,13 @@ router.post("/geocoding", async (req, res) => {
       "select direccion_full, latitud, longitud from camiones.operativos"
     );
 
-    for (const i in autos.rows.filter(
-      (row) => row.latitud == null && row.longitud == null
-    )) {
-      const busca = autos.rows.find(
-        (row) =>
-          row.direccion_full === autos.rows[i].direccion_full &&
-          row.latitud != null &&
-          row.longitud != null
-      );
-      if (!busca) {
-        const { latitud, longitud } = await geoLocation(
-          autos.rows[i].direccion_full
-        );
+    const autosPromise = geoLocateTable(autos.rows, "operativos");
+    const motosPromise = geoLocateTable(motos.rows, "motos");
+    const camionesPromise = geoLocateTable(camiones.rows, "camiones");
 
-        await pool.query(
-          "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, autos.rows[i].direccion_full]
-        );
-      } else {
-        await pool.query(
-          "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [busca.latitud, busca.longitud, busca.direccion_full]
-        );
-      }
-    }
-    for (const i in motos.rows.filter(
-      (row) => row.latitud == null && row.longitud == null
-    )) {
-      const busca = motos.rows.find(
-        (row) =>
-          row.direccion_full === motos.rows[i].direccion_full &&
-          row.latitud != null &&
-          row.longitud != null
-      );
-
-      if (!busca) {
-        const { latitud, longitud } = await geoLocation(
-          autos.rows[i].direccion_full
-        );
-
-        await pool.query(
-          "update motos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, autos.rows[i].direccion_full]
-        );
-      } else {
-        await pool.query(
-          "update motos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [busca.latitud, busca.longitud, busca.direccion_full]
-        );
-      }
-    }
-    for (const i in camiones.rows.filter(
-      (row) => row.latitud == null && row.longitud == null
-    )) {
-      const busca = camiones.rows.find(
-        (row) =>
-          row.direccion_full === camiones.rows[i].direccion_full &&
-          row.latitud != null &&
-          row.longitud != null
-      );
-
-      if (!busca) {
-        const { latitud, longitud } = await geoLocation(
-          autos.rows[i].direccion_full
-        );
-
-        await pool.query(
-          "update camiones.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, autos.rows[i].direccion_full]
-        );
-      } else {
-        await pool.query(
-          "update camiones.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [busca.latitud, busca.longitud, busca.direccion_full]
-        );
-      }
-    }
+    await autosPromise;
+    await motosPromise;
+    await camionesPromise;
     res.json("Success");
   } catch (error) {
     console.log(error);

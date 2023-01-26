@@ -1,10 +1,8 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const pool = require("../pool");
-const validInfo = require("../middleware/validInfo");
-const jwtGenerator = require("../utils/jwtGenerator");
-const authorize = require("../middleware/authorize");
+const { validInfo, authorize } = require("../middleware");
+const { jwtGenerator } = require("../utils");
 
 router.post("/register", validInfo, async (req, res) => {
   const { legajo, nombre, apellido, password, telefono } = req.body;

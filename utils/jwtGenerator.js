@@ -6,4 +6,4 @@ function jwtGenerator(user) {
   return jwt.sign(payload, process.env.jwtSecret);
 }
 
-module.exports = jwtGenerator;
+module.exports = { jwtGenerator };

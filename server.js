@@ -12,14 +12,6 @@ app.use(
   })
 );
 
-app.use("/", require("./routes/index"));
-app.use("/operativos/autos", require("./routes/operativos/autos"));
-app.use("/operativos/motos", require("./routes/operativos/motos"));
-app.use("/operativos/camiones", require("./routes/operativos/camiones"));
-app.use("/control/diario", require("./routes/control/diario"));
-app.use("/control/paseo", require("./routes/control/paseo"));
-app.use("/sueldos", require("./routes/sueldos/index"));
-app.use("/auth", require("./routes/jwtAuth"));
-app.use("/waze", require("./routes/waze/index"));
+app.use("/", require("./routes"));
 
 app.listen(port);

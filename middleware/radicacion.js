@@ -1,8 +1,8 @@
-const pool = require("../pool");
-const spawn = require("child_process").spawn;
 require("dotenv").config();
+const pool = require("../pool");
+const { spawn } = require("child_process");
 
-module.exports = (req, res, next) => {
+const radicacion = (req, res, next) => {
   const { dominio } = req.body;
 
   const pythonProcess = spawn("python", [process.env.DNRPA_ROUTE, dominio]);
@@ -48,3 +48,5 @@ module.exports = (req, res, next) => {
     res.status(500).json("Server error");
   });
 };
+
+module.exports = { radicacion };

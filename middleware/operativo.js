@@ -1,5 +1,5 @@
-const { sqlDateFormat, sqlTimeFormat } = require("../utils/dateFormat");
 const pool = require("../pool");
+const { sqlDateFormat, sqlTimeFormat } = require("../utils");
 
 const operativoAlcoholemia = async (req, res, next) => {
   const {

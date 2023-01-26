@@ -1,5 +1,5 @@
 const pool = require("../pool");
-module.exports = async (req, res, next) => {
+const getCP = async (req, res, next) => {
   try {
     const { zona } = req.body;
     const {
@@ -15,3 +15,5 @@ module.exports = async (req, res, next) => {
     res.status(500).json("Server error");
   }
 };
+
+module.exports = { getCP };

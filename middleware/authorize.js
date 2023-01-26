@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-module.exports = (req, res, next) => {
+const authorize = (req, res, next) => {
   const token = req.header("jwt_token");
 
   if (!token) {
@@ -17,3 +17,5 @@ module.exports = (req, res, next) => {
     res.status(401).json("Token invalido");
   }
 };
+
+module.exports = { authorize };
