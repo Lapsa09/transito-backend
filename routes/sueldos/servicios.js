@@ -10,12 +10,11 @@ const {
 
 router.get("/", async (req, res) => {
   try {
-    const { _sort, _order, d, _start, _end, m, y, q, no_memo } = req.query;
+    const { _sort, _order, d, _start, _end, m, y, q = "", no_memo } = req.query;
     const servicios = await pool.query(
       "select s.id_servicio as id,upper(c.cliente) as cliente,s.fecha_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios op on o.legajo=op.legajo order by s.fecha_servicio asc"
     );
-
-    const result = groupByMemo(servicios.rows)
+    const result = servicios.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
         !!d ? dateFormatJS(row.fecha_servicio) === dateFormat(d) : row
@@ -23,13 +22,15 @@ router.get("/", async (req, res) => {
       .filter((row) => (!!m ? row.fecha_servicio.getMonth() + 1 == m : row))
       .filter((row) => (!!y ? row.fecha_servicio.getFullYear() == y : row))
       .filter((row) =>
-        !!q ? row.cliente.includes(q) || row.memo.includes(q) : row
+        !!q
+          ? row.cliente?.includes(q.toUpperCase()) || row.memo?.includes(q)
+          : row
       )
       .filter((row) => (no_memo ? !row.memo : row));
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    res.set("X-Total-Count", result.length);
+    res.set("X-Total-Count", groupByMemo(result).length);
 
-    res.json(result.slice(_start, _end));
+    res.json(groupByMemo(result).slice(_start, _end));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
@@ -117,7 +118,7 @@ router.put("/:id", async (req, res) => {
       );
     }
 
-    res.json({ data: servicio.rows });
+    res.json(servicio.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

@@ -32,19 +32,20 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/list", async (req, res) => {
-  const { q } = req.query;
+  const { q = "" } = req.query;
   try {
     const operarios = await pool.query(
-      "select * from sueldos.operarios where legajo like %$1% or nombre like %$1% order by nombre asc",
-      [q]
+      "select * from sueldos.operarios order by nombre asc"
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", operarios.rows.length);
     res.json(
-      operarios.rows.map((row) => ({
-        id: row.legajo,
-        name: row.nombre,
-      }))
+      operarios.rows
+        .map((row) => ({
+          id: row.legajo,
+          name: row.nombre,
+        }))
+        .filter((row) => row.id.toString().includes(q) || row.name.includes(q))
     );
   } catch (error) {
     console.log(error);
@@ -80,10 +81,10 @@ router.put("/cliente/:id", async (req, res) => {
       "update sueldos.servicios set importe_servicio=(select sum(a_cobrar) from sueldos.operarios_servicios where id_servicio=$1 and cancelado=false) where id_servicio=$1 returning id_servicio as id,*",
       [id]
     );
-    res.json({ data: servicios.rows[0] });
+    res.json(servicios.rows[0]);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ data: "Server error" });
+    res.status(500).json("Server error");
   }
 });
 

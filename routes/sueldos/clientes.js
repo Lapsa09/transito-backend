@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const pool = require("../../pool");
 const { sueldos } = require("../../middleware");
-const { sorting, timeFormat, setArrayId } = require("../../utils");
+const { sorting, timeFormat } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {
@@ -13,10 +13,14 @@ router.get("/", async (req, res) => {
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     const response = clientes.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
+      .map((cliente) => ({
+        ...cliente,
+        id: cliente.id_cliente,
+      }))
       .filter((row) => row.cliente.includes(q.toUpperCase()));
 
     res.set("X-Total-Count", response.length);
-    res.json(setArrayId(response).slice(_start, _end));
+    res.json(response.slice(_start, _end));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
@@ -24,19 +28,20 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/list", async (req, res) => {
-  const { q } = req.query;
+  const { q = "" } = req.query;
   try {
     const clientes = await pool.query(
-      "select * from sueldos.clientes where cliente like %$1% order by id_cliente asc",
-      [q]
+      "select * from sueldos.clientes order by id_cliente asc"
     );
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", clientes.rows.length);
     res.json(
-      clientes.rows.map((row) => ({
-        id: row.id_cliente,
-        name: row.cliente?.toUpperCase(),
-      }))
+      clientes.rows
+        .map((row) => ({
+          id: row.id_cliente,
+          name: row.cliente?.toUpperCase(),
+        }))
+        .filter((row) => row.name?.toUpperCase().includes(q.toUpperCase()))
     );
   } catch (error) {
     console.log(error);
@@ -50,16 +55,16 @@ router.post("/", sueldos, async (req, res) => {
       id_cliente,
       memo,
       fecha_servicio,
-      feriado,
       operarios,
       recibo,
       fecha_recibo,
       importe_recibo,
       importe_servicio,
+      feriado,
     } = req.body;
 
     const servicio = await pool.query(
-      "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio",
+      "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio as id,*",
       [
         id_cliente,
         memo,
@@ -86,7 +91,7 @@ router.post("/", sueldos, async (req, res) => {
       );
     }
 
-    res.json({ data: servicio });
+    res.json(servicio.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
@@ -96,10 +101,11 @@ router.post("/", sueldos, async (req, res) => {
 router.post("/list", async (req, res) => {
   try {
     const { cliente } = req.body;
-    await pool.query("insert into sueldos.clientes(cliente) values($1)", [
-      cliente,
-    ]);
-    res.json({ data: cliente });
+    const res = await pool.query(
+      "insert into sueldos.clientes(cliente) values($1) returning id_cliente as id, cliente",
+      [cliente]
+    );
+    res.json(res.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

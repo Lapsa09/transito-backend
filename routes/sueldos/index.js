@@ -76,13 +76,13 @@ router.get("/acopio/:id", async (req, res) => {
   res.json({ ...response.rows[0], id });
 });
 
-router.get("/precios", async (req, res) => {
+router.get("/precios/:id", async (req, res) => {
   const response = await pool.query("select * from sueldos.precios");
 
   res.json({ ...response.rows[0], id: 0 });
 });
 
-router.put("/precios", async (req, res) => {
+router.put("/precios/:id", async (req, res) => {
   const { precio_normal, precio_pico } = req.body;
   const response = await pool.query(
     "update sueldos.precios set precio_normal=$1,precio_pico=$2",
@@ -101,7 +101,7 @@ router.put("/memos/:id", async (req, res) => {
       [memo, id]
     );
 
-    res.json({ data: response.rows[0] });
+    res.json(response.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
