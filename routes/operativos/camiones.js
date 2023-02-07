@@ -31,7 +31,7 @@ router.post("/", operativoCamiones, async (req, res) => {
       acta,
       motivo,
       lpcarga,
-      id_operativo,
+      operativo,
       latitud = null,
       longitud = null,
       direccion,
@@ -40,12 +40,12 @@ router.post("/", operativoCamiones, async (req, res) => {
 
     const repetido = await pool.query(
       "select dominio, id_operativo from camiones.registros where id_operativo=$1 and dominio=$2",
-      [id_operativo, dominio]
+      [operativo.id_op, dominio]
     );
 
     if (repetido.rows.length === 0) {
-      await pool.query(
-        "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo,latitud,longitud,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14,$15,$16,$17)",
+      const nuevo = await pool.query(
+        "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo,latitud,longitud,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14,$15,$16,$17) returning *",
         [
           timeFormat(hora),
           dominio,
@@ -60,13 +60,20 @@ router.post("/", operativoCamiones, async (req, res) => {
           acta,
           motivo?.id_motivo || null,
           lpcarga,
-          id_operativo,
+          operativo.id_op,
           latitud,
           longitud,
           `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
         ]
       );
-      res.json("Success");
+      const [registro] = nuevo.rows;
+      res.json({
+        ...operativo,
+        ...registro,
+        localidad_origen: localidad_origen.barrio,
+        localidad_destino: localidad_destino.barrio,
+        motivo: motivo?.motivo,
+      });
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }

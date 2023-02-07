@@ -43,16 +43,16 @@ router.post(
         longitud,
         tipo_licencia,
         zona_infractor,
-        id_operativo,
+        operativo,
       } = req.body;
 
       const repetido = await pool.query(
         "select dominio,id_operativo from operativos.registros where id_operativo=$1 and dominio=$2",
-        [id_operativo, dominio]
+        [operativo.id_op, dominio]
       );
       if (repetido.rows.length === 0) {
-        await pool.query(
-          "insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)",
+        const nuevo = await pool.query(
+          "insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning *",
           [
             dominio,
             parseInt(licencia) || null,
@@ -70,10 +70,18 @@ router.post(
             longitud,
             tipo_licencia?.id_tipo || null,
             zona_infractor.id_barrio,
-            id_operativo,
+            operativo.id_op,
           ]
         );
-        res.json("Success");
+        const [registro] = nuevo.rows;
+        res.json({
+          ...operativo,
+          ...registro,
+          tipo_licencia: tipo_licencia.tipo,
+          zona_infractor: zona_infractor.barrio,
+          motivo: motivo?.motivo,
+          tipo_vehiculo: tipo_licencia.vehiculo,
+        });
       } else {
         res
           .status(401)

@@ -39,16 +39,16 @@ router.post("/", operativoMotos, async (req, res) => {
       zona_infractor,
       zona,
       direccion,
-      id_operativo,
+      operativo,
     } = req.body;
 
     const repetido = await pool.query(
       "select dominio,id_operativo from motos.registros where id_operativo=$1 and dominio=$2",
-      [id_operativo, dominio]
+      [operativo.id_op, dominio]
     );
     if (repetido.rows.length === 0) {
       const id_v = await pool.query(
-        "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning id",
+        "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning *",
         [
           dominio,
           parseInt(licencia) || null,
@@ -60,18 +60,26 @@ router.post("/", operativoMotos, async (req, res) => {
           `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
           tipo_licencia?.id_tipo || null,
           zona_infractor.id_barrio,
-          id_operativo,
+          operativo.id_op,
         ]
       );
+      const [registro] = id_v.rows;
+      operativo.motivos = [];
       if (motivos.length > 0) {
         for (const motivo in motivos) {
           await pool.query(
             "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
-            [id_v.rows[0].id, motivos[motivo].id_motivo]
+            [registro.id, motivos[motivo].id_motivo]
           );
+          operativo.motivos.push(motivos[motivo].motivo);
         }
       }
-      res.json("Success");
+      res.json({
+        ...operativo,
+        ...registro,
+        tipo_licencia: tipo_licencia.tipo,
+        zona_infractor: zona_infractor.barrio,
+      });
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }
