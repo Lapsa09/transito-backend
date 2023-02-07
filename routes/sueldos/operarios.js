@@ -56,11 +56,11 @@ router.get("/list", async (req, res) => {
 router.post("/list", async (req, res) => {
   try {
     const { id, name } = req.body;
-    await pool.query(
-      "insert into sueldos.operarios(legajo,nombre) values($1,$2)",
+    const response = await pool.query(
+      "insert into sueldos.operarios(legajo,nombre) values($1,$2) returning legajo as id, nombre as name",
       [id, name]
     );
-    res.send("Ok");
+    res.json(response.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

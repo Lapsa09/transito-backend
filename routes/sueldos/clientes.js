@@ -101,11 +101,11 @@ router.post("/", sueldos, async (req, res) => {
 router.post("/list", async (req, res) => {
   try {
     const { cliente } = req.body;
-    const res = await pool.query(
+    const response = await pool.query(
       "insert into sueldos.clientes(cliente) values($1) returning id_cliente as id, cliente",
       [cliente]
     );
-    res.json(res.rows[0]);
+    res.json(response.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
