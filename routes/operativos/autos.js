@@ -77,10 +77,10 @@ router.post(
         res.json({
           ...operativo,
           ...registro,
-          tipo_licencia: tipo_licencia.tipo,
+          tipo_licencia: tipo_licencia?.tipo,
           zona_infractor: zona_infractor.barrio,
           motivo: motivo?.motivo,
-          tipo_vehiculo: tipo_licencia.vehiculo,
+          tipo_vehiculo: tipo_licencia?.vehiculo,
         });
       } else {
         res
