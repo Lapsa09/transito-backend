@@ -96,12 +96,20 @@ router.put("/memos/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { memo } = req.body;
-    const response = await pool.query(
-      "update sueldos.servicios set memo=$1 where id_servicio=$2 returning id_servicio as id,*",
-      [memo, id]
+
+    const _servicio = await pool.query(
+      "select id_cliente, fecha_servicio from sueldos.servicios where id_servicio=$1",
+      [id]
     );
 
-    res.json(response.rows[0]);
+    const [servicio] = _servicio.rows;
+
+    await pool.query(
+      "update sueldos.servicios set memo=$1 where id_cliente=$2 and fecha_servicio=$3",
+      [memo, servicio.id_cliente, servicio.fecha_servicio]
+    );
+
+    res.json({ ...servicio, id: servicio.id_cliente });
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
