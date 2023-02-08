@@ -77,7 +77,7 @@ router.post("/", operativoMotos, async (req, res) => {
       res.json({
         ...operativo,
         ...registro,
-        tipo_licencia: tipo_licencia.tipo,
+        tipo_licencia: tipo_licencia?.tipo,
         zona_infractor: zona_infractor.barrio,
       });
     } else {
