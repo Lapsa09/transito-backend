@@ -1,23 +1,23 @@
 const router = require("express").Router();
 const pool = require("../../pool");
 const { sueldos } = require("../../middleware");
-const { sorting, timeFormat } = require("../../utils");
+const { sorting, timeFormat, groupByCliente } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {
     const { _sort, _order, q = "", _start, _end } = req.query;
     const clientes = await pool.query(
-      "SELECT C.ID_CLIENTE, UPPER(C.CLIENTE) AS CLIENTE, JSON_AGG(JSON_BUILD_OBJECT('mes',JSONB_BUILD_OBJECT('id', EXTRACT(MONTH FROM S.FECHA_SERVICIO), 'name', TO_CHAR(S.FECHA_SERVICIO,'MONTH')), 'año',EXTRACT(YEAR FROM S.FECHA_SERVICIO), 'servicios',SERVICIOS)) HISTORIAL, SUM(S.IMPORTE_RECIBO)::INTEGER AS A_DEUDOR, SUM(COALESCE(S.IMPORTE_RECIBO,0) - S.IMPORTE_SERVICIO)::INTEGER AS A_FAVOR FROM SUELDOS.CLIENTES C INNER JOIN SUELDOS.SERVICIOS S ON C.ID_CLIENTE = S.ID_CLIENTE LEFT JOIN (SELECT C.ID_CLIENTE,extract(month from s.fecha_servicio) as mes, JSON_AGG(JSON_BUILD_OBJECT('id', S.ID_SERVICIO, 'recibo', S.RECIBO, 'fecha_recibo', S.FECHA_RECIBO, 'importe_recibo', S.IMPORTE_RECIBO, 'fecha_servicio', S.FECHA_SERVICIO, 'importe_servicio', S.IMPORTE_SERVICIO, 'memo', S.MEMO, 'operarios', OPERARIOS)) SERVICIOS FROM SUELDOS.SERVICIOS S JOIN SUELDOS.CLIENTES C ON C.ID_CLIENTE = S.ID_CLIENTE LEFT JOIN (SELECT ID_SERVICIO, JSON_AGG(JSON_BUILD_OBJECT('id_servicio', O.ID_SERVICIO, 'legajo', O.LEGAJO, 'nombre', OP.NOMBRE, 'a_cobrar', O.A_COBRAR, 'hora_inicio', O.HORA_INICIO, 'hora_fin', O.HORA_FIN, 'cancelado', O.CANCELADO)) OPERARIOS FROM SUELDOS.OPERARIOS OP LEFT JOIN SUELDOS.OPERARIOS_SERVICIOS O ON OP.LEGAJO = O.legajo GROUP BY ID_SERVICIO) OS ON OS.ID_SERVICIO = S.ID_SERVICIO GROUP BY 1,2) SC ON SC.ID_CLIENTE = C.ID_CLIENTE and sc.mes=extract(month from s.fecha_servicio) GROUP BY 1"
+      "select s.id_cliente,c.cliente,s.id_servicio,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.operarios op on o.legajo=op.legajo order by 1 asc,3 asc,7 asc"
     );
 
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    const response = clientes.rows
+    const response = groupByCliente(clientes.rows)
       .sort((a, b) => sorting(a, b, _order, _sort))
       .map((cliente) => ({
         ...cliente,
         id: cliente.id_cliente,
       }))
-      .filter((row) => row.cliente.includes(q.toUpperCase()));
+      .filter((row) => row.cliente?.toUpperCase().includes(q.toUpperCase()));
 
     res.set("X-Total-Count", response.length);
     res.json(response.slice(_start, _end));

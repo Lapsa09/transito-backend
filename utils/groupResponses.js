@@ -5,6 +5,72 @@ const {
   dateFormatJS,
 } = require("./dateFormat");
 
+const groupByCliente = (data) => {
+  return data.reduce((acc, row) => {
+    let cliente = acc.find((c) => c.id_cliente === row.id_cliente);
+    if (!cliente) {
+      cliente = {
+        id_cliente: row.id_cliente,
+        cliente: row.cliente?.toUpperCase(),
+        id: row.id_cliente,
+        historial: [],
+        a_deudor: 0,
+        a_favor: 0,
+      };
+      acc.push(cliente);
+    }
+    let historia = cliente.historial.find(
+      (h) =>
+        h.id_cliente +
+          getMonthJS(row.fecha_servicio) +
+          getYear(row.fecha_servicio) ===
+        h.id
+    );
+    if (!historia) {
+      historia = {
+        id_servicio: row.id_servicio,
+        id_cliente: row.id_cliente,
+        cliente: row.cliente,
+        mes: {
+          id: getMonthJS(row.fecha_servicio),
+          name: getMonthName(row.fecha_servicio),
+        },
+        año: getYear(row.fecha_servicio),
+        gastos: row.importe_servicio,
+        acopio: row.importe_recibo - row.importe_servicio,
+        id:
+          row.id_cliente +
+          getMonthJS(row.fecha_servicio) +
+          getYear(row.fecha_servicio),
+        servicios: [],
+      };
+      cliente.historial.push(historia);
+    }
+    historia.servicios.push({
+      id_servicio: row.id_servicio,
+      recibo: row.recibo,
+      fecha_recibo: row.fecha_recibo,
+      importe_recibo: row.importe_recibo,
+      fecha_servicio: row.fecha_servicio,
+      importe_servicio: row.importe_servicio,
+      memo: row.memo,
+      operarios: [
+        {
+          legajo: row.legajo,
+          nombre: row.nombre,
+          a_cobrar: row.a_cobrar,
+          cancelado: row.cancelado,
+        },
+      ],
+    });
+    historia.gastos += row.importe_servicio;
+    historia.acopio += row.importe_recibo - row.importe_servicio;
+    cliente.a_deudor += row.importe_servicio;
+    cliente.a_favor += row.importe_recibo - row.importe_servicio;
+    return acc;
+  }, []);
+};
+
 const groupByInspector = (data) => {
   const arr = [];
   data.forEach((d) => {
@@ -209,4 +275,5 @@ module.exports = {
   groupByMemo,
   groupByDay,
   promedio,
+  groupByCliente,
 };
