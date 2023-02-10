@@ -65,7 +65,7 @@ router.post("/", operativoMotos, async (req, res) => {
       );
       const [registro] = id_v.rows;
       operativo.motivos = [];
-      if (motivos.length > 0) {
+      if (motivos?.length > 0) {
         for (const motivo in motivos) {
           await pool.query(
             "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
