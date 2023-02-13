@@ -23,7 +23,8 @@ router.get("/", async (req, res) => {
       .filter((row) => (!!y ? row.fecha_servicio.getFullYear() == y : row))
       .filter((row) =>
         !!q
-          ? row.cliente?.includes(q.toUpperCase()) || row.memo?.includes(q)
+          ? row.cliente?.toUpperCase().includes(q.toUpperCase()) ||
+            row.memo?.includes(q)
           : row
       )
       .filter((row) => (no_memo ? !row.memo : row));

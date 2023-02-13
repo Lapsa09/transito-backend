@@ -45,7 +45,11 @@ router.get("/list", async (req, res) => {
           id: row.legajo,
           name: row.nombre,
         }))
-        .filter((row) => row.id.toString().includes(q) || row.name.includes(q))
+        .filter(
+          (row) =>
+            row.id.toString().includes(q) ||
+            row.name.toUpperCase().includes(q.toUpperCase())
+        )
     );
   } catch (error) {
     console.log(error);
