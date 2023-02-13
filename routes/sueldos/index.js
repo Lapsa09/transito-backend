@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const pool = require("../../pool");
+const { getMonth } = require("../../utils");
 
 router.use("/operarios", require("./operarios"));
 router.use("/clientes", require("./clientes"));
@@ -105,8 +106,8 @@ router.put("/memos/:id", async (req, res) => {
     const [servicio] = _servicio.rows;
 
     await pool.query(
-      "update sueldos.servicios set memo=$1 where id_cliente=$2 and fecha_servicio=$3",
-      [memo, servicio.id_cliente, servicio.fecha_servicio]
+      "update sueldos.servicios set memo=$1 where id_cliente=$2 and extract(month from fecha_servicio)=$3",
+      [memo, servicio.id_cliente, getMonth(servicio.fecha_servicio)]
     );
 
     res.json({ ...servicio, id: servicio.id_cliente });
