@@ -185,6 +185,8 @@ const groupByMemo = (data) => {
         nombre: row.nombre,
         a_cobrar: +row.a_cobrar,
         cancelado: row.cancelado,
+        hora_inicio: row.hora_inicio,
+        hora_fin: row.hora_fin,
       });
       return acc;
     } else {
@@ -204,6 +206,8 @@ const groupByMemo = (data) => {
           nombre: row.nombre,
           a_cobrar: +row.a_cobrar,
           cancelado: row.cancelado,
+          hora_inicio: row.hora_inicio,
+          hora_fin: row.hora_fin,
         },
       ];
       return acc.concat(obj);

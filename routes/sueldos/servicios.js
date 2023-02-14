@@ -6,6 +6,7 @@ const {
   dateFormat,
   groupByMemo,
   groupByServicio,
+  timeFormat,
 } = require("../../utils");
 
 router.get("/", async (req, res) => {
@@ -105,14 +106,14 @@ router.put("/:id", async (req, res) => {
       ]
     );
 
-    for (const operario in operarios) {
+    for (const i in operarios) {
       await pool.query(
         "update sueldos.operarios_servicios set legajo=$1,a_cobrar=$2,hora_inicio=$3,hora_fin=$4 where id_servicio=$5",
         [
-          operario.legajo,
-          operario.a_cobrar,
-          operario.hora_inicio,
-          operario.hora_fin,
+          operarios[i].legajo,
+          operarios[i].a_cobrar,
+          timeFormat(operarios[i].hora_inicio),
+          timeFormat(operarios[i].hora_fin),
           id,
         ]
       );
