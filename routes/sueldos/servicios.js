@@ -64,7 +64,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(
-      "select s.id_servicio as id,s.id_cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo,s.feriado,json_agg(json_build_object('legajo',o.legajo,'nombre',op.nombre,'a_cobrar',o.a_cobrar,'hora_inicio',o.hora_inicio,'hora_fin',o.hora_fin))as operarios from sueldos.servicios s left join sueldos.operarios_servicios o on o.id_servicio=s.id_servicio right join sueldos.operarios op on o.legajo=op.legajo where o.legajo is not null and s.id_servicio=$1 group by s.id_servicio,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.acopio,s.memo,s.feriado order by s.id_servicio asc",
+      "select s.id_servicio as id,s.id_cliente,s.recibo,s.fecha_recibo,s.importe_recibo,s.fecha_servicio,s.importe_servicio,s.memo,s.feriado,json_agg(json_build_object('legajo',o.legajo,'nombre',op.nombre,'a_cobrar',o.a_cobrar,'hora_inicio',o.hora_inicio,'hora_fin',o.hora_fin))as operarios from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.operarios op on o.legajo=op.legajo where s.id_servicio=$1 group by 1,2,3,4,5,6,7,8,9",
       [id]
     );
 
@@ -91,7 +91,7 @@ router.put("/:id", async (req, res) => {
     } = req.body;
 
     const servicio = await pool.query(
-      "update sueldos.servicios set id_cliente=$1,memo=$2,recibo=$3,fecha_recibo=$4,importe_recibo=$5,fecha_servicio=$6,importe_servicio=$7,feriado=$8,acopio=$9 where id_servicio=$10 returning id_servicio as id,*",
+      "update sueldos.servicios set id_cliente=$1,memo=$2,recibo=$3,fecha_recibo=$4,importe_recibo=$5,fecha_servicio=$6,importe_servicio=$7,feriado=$8 where id_servicio=$9 returning id_servicio as id,*",
       [
         id_cliente,
         memo,
@@ -101,7 +101,6 @@ router.put("/:id", async (req, res) => {
         fecha_servicio,
         importe_servicio,
         feriado,
-        importe_recibo - importe_servicio,
         id,
       ]
     );
