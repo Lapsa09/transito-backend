@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const pool = require("../pool");
-const { geoLocateTable } = require("../utils");
 
 router.use("/operativos", require("./operativos"));
 router.use("/control", require("./control"));
@@ -54,32 +53,6 @@ router.get("/licencias", async (req, res) => {
     res.json(licencias.rows);
   } catch (error) {
     res.status(500).json(error);
-  }
-});
-
-router.post("/geocoding", async (req, res) => {
-  try {
-    const autos = await pool.query(
-      "select direccion_full, latitud, longitud from operativos.operativos"
-    );
-    const motos = await pool.query(
-      "select direccion_full, latitud, longitud from motos.operativos"
-    );
-    const camiones = await pool.query(
-      "select direccion_full, latitud, longitud from camiones.operativos"
-    );
-
-    const autosPromise = geoLocateTable(autos.rows, "operativos");
-    const motosPromise = geoLocateTable(motos.rows, "motos");
-    const camionesPromise = geoLocateTable(camiones.rows, "camiones");
-
-    await autosPromise;
-    await motosPromise;
-    await camionesPromise;
-    res.json("Success");
-  } catch (error) {
-    console.log(error);
-    res.status(500).json("Server error");
   }
 });
 

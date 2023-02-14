@@ -94,4 +94,44 @@ router.post(
   }
 );
 
+router.post("/geocoding", async (req, res) => {
+  try {
+    const autos = await pool.query(
+      "select direccion_full, latitud, longitud from operativos.operativos"
+    );
+
+    const geoEmpty = autos.rows.filter(
+      (row) => row.latitud == null && row.longitud == null
+    );
+
+    for (const i in geoEmpty) {
+      const busca = autos.rows.find(
+        (row) =>
+          row.direccion_full === autos.rows[i].direccion_full &&
+          row.latitud != null &&
+          row.longitud != null
+      );
+      if (!busca) {
+        const { latitud, longitud } = await geoLocation(
+          autos.rows[i].direccion_full
+        );
+
+        await pool.query(
+          "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
+          [latitud, longitud, autos.rows[i].direccion_full]
+        );
+      } else {
+        await pool.query(
+          "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
+          [busca.latitud, busca.longitud, busca.direccion_full]
+        );
+      }
+    }
+    res.json("Success");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
+});
+
 module.exports = router;

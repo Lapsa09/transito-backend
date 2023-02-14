@@ -13,30 +13,4 @@ const geoLocation = async (direccion) => {
   return { latitud, longitud };
 };
 
-const geoLocateTable = async (table, name) => {
-  for (const i in table.filter(
-    (row) => row.latitud == null && row.longitud == null
-  )) {
-    const busca = table.find(
-      (row) =>
-        row.direccion_full === table[i].direccion_full &&
-        row.latitud != null &&
-        row.longitud != null
-    );
-    if (!busca) {
-      const { latitud, longitud } = await geoLocation(table[i].direccion_full);
-
-      await pool.query(
-        `update ${name}.operativos set latitud=$1, longitud=$2 where direccion_full=$3`,
-        [latitud, longitud, table[i].direccion_full]
-      );
-    } else {
-      await pool.query(
-        `update ${name}.operativos set latitud=$1, longitud=$2 where direccion_full=$3`,
-        [busca.latitud, busca.longitud, busca.direccion_full]
-      );
-    }
-  }
-};
-
-module.exports = { geoLocation, geoLocateTable };
+module.exports = { geoLocation };

@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const pool = require("../../pool");
 const { operativoCamiones } = require("../../middleware");
-const { timeFormat } = require("../../utils");
+const { timeFormat, geoLocation } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {
@@ -77,6 +77,47 @@ router.post("/", operativoCamiones, async (req, res) => {
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
+});
+
+router.post("/geocoding", async (req, res) => {
+  try {
+    const camiones = await pool.query(
+      "select direccion_full, latitud, longitud from camiones.operativos"
+    );
+
+    const geoEmpty = camiones.rows.filter(
+      (row) => row.latitud == null && row.longitud == null
+    );
+
+    for (const i in geoEmpty) {
+      const busca = camiones.rows.find(
+        (row) =>
+          row.direccion_full === camiones.rows[i].direccion_full &&
+          row.latitud != null &&
+          row.longitud != null
+      );
+      if (!busca) {
+        const { latitud, longitud } = await geoLocation(
+          camiones.rows[i].direccion_full
+        );
+
+        await pool.query(
+          "update camiones.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
+          [latitud, longitud, camiones.rows[i].direccion_full]
+        );
+      } else {
+        await pool.query(
+          "update camiones.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
+          [busca.latitud, busca.longitud, busca.direccion_full]
+        );
+      }
+    }
+
+    res.json("Success");
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
