@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     const servicios = await pool.query(
       "select s.id_servicio as id,upper(c.cliente) as cliente,s.fecha_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios op on o.legajo=op.legajo order by s.fecha_servicio asc"
     );
-    const result = servicios.rows
+    const result = groupByMemo(servicios.rows)
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
         !!d ? dateFormatJS(row.fecha_servicio) === dateFormat(d) : row
@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", groupByMemo(result).length);
 
-    res.json(groupByMemo(result).slice(_start, _end));
+    res.json(result.slice(_start, _end));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

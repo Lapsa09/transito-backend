@@ -188,6 +188,10 @@ const groupByMemo = (data) => {
         hora_inicio: row.hora_inicio,
         hora_fin: row.hora_fin,
       });
+      busca.hora_inicio = Math.min(
+        ...busca.operarios.map((o) => o.hora_inicio)
+      );
+      busca.hora_fin = Math.max(...busca.operarios.map((o) => o.hora_fin));
       return acc;
     } else {
       const obj = {
@@ -195,6 +199,8 @@ const groupByMemo = (data) => {
         memo: row.memo,
         fecha_servicio: dateFormatJS(row.fecha_servicio),
         cliente: row.cliente,
+        hora_inicio: row.hora_inicio,
+        hora_fin: row.hora_fin,
       };
       obj.operarios = [
         {
