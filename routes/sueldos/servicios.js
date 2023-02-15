@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { sueldos } = require("../../middleware");
 const pool = require("../../pool");
 const {
   sorting,
@@ -33,6 +34,55 @@ router.get("/", async (req, res) => {
     res.set("X-Total-Count", groupByMemo(result).length);
 
     res.json(groupByMemo(result).slice(_start, _end));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
+});
+
+router.post("/", sueldos, async (req, res) => {
+  try {
+    const {
+      id_cliente,
+      memo,
+      fecha_servicio,
+      operarios,
+      recibo,
+      fecha_recibo,
+      importe_recibo,
+      importe_servicio,
+      feriado,
+    } = req.body;
+
+    const servicio = await pool.query(
+      "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio as id,*",
+      [
+        id_cliente,
+        memo,
+        recibo || null,
+        fecha_recibo || null,
+        importe_recibo || null,
+        fecha_servicio,
+        importe_servicio,
+        feriado,
+      ]
+    );
+    const [{ id_servicio }] = servicio.rows;
+
+    for (const o in operarios) {
+      await pool.query(
+        "insert into sueldos.operarios_servicios (legajo,id_servicio,a_cobrar,hora_inicio,hora_fin,cancelado) values ($1,$2,$3,$4,$5,false)",
+        [
+          operarios[o].legajo,
+          id_servicio,
+          operarios[o].a_cobrar,
+          timeFormat(operarios[o].hora_inicio),
+          timeFormat(operarios[o].hora_fin),
+        ]
+      );
+    }
+
+    res.json(servicio.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
