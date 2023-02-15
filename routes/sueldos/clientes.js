@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     );
 
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
-    const response = groupByCliente(clientes.rows)
+    const response = clientes.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
       .map((cliente) => ({
         ...cliente,
@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
       }))
       .filter((row) => row.cliente?.toUpperCase().includes(q.toUpperCase()));
 
-    res.set("X-Total-Count", response.length);
-    res.json(response.slice(_start, _end));
+    res.set("X-Total-Count", groupByCliente(response).length);
+    res.json(groupByCliente(response).slice(_start, _end));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

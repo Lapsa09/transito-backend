@@ -8,6 +8,8 @@ const {
   groupByMemo,
   groupByServicio,
   timeFormat,
+  getYear,
+  getMonthJS,
 } = require("../../utils");
 
 router.get("/", async (req, res) => {
@@ -16,13 +18,13 @@ router.get("/", async (req, res) => {
     const servicios = await pool.query(
       "select s.id_servicio as id,upper(c.cliente) as cliente,s.fecha_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios op on o.legajo=op.legajo order by s.fecha_servicio asc"
     );
-    const result = groupByMemo(servicios.rows)
+    const result = servicios.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
       .filter((row) =>
         !!d ? dateFormatJS(row.fecha_servicio) === dateFormat(d) : row
       )
-      .filter((row) => (!!m ? row.fecha_servicio.getMonth() + 1 == m : row))
-      .filter((row) => (!!y ? row.fecha_servicio.getFullYear() == y : row))
+      .filter((row) => (!!m ? getMonthJS(row.fecha_servicio) == m : row))
+      .filter((row) => (!!y ? getYear(row.fecha_servicio) == y : row))
       .filter((row) =>
         !!q
           ? row.cliente?.toUpperCase().includes(q.toUpperCase()) ||
@@ -33,7 +35,7 @@ router.get("/", async (req, res) => {
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
     res.set("X-Total-Count", groupByMemo(result).length);
 
-    res.json(result.slice(_start, _end));
+    res.json(groupByMemo(result).slice(_start, _end));
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
