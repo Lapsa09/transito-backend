@@ -5,7 +5,7 @@ const {
   es_del,
   operativoAlcoholemia,
 } = require("../../middleware");
-const { getMonth, getWeek } = require("../../utils");
+const { getMonth, getWeek, geoLocation } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {
