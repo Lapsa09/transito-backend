@@ -24,18 +24,17 @@ const radicacion = (req, res, next) => {
     } else {
       if (localidad === "CAPITAL FEDERAL") {
         const id_barrio = 51;
-        req.body.localidadInfractor = id_barrio;
+        req.body.localidadInfractor = { id_barrio, barrio: "CABA" };
       } else {
-        const res = await pool.query(
-          "select id_barrio from barrios where barrio=$1",
-          [localidad]
-        );
+        const res = await pool.query("select * from barrios where barrio=$1", [
+          localidad,
+        ]);
         if (res.rowCount === 0) {
           const id_barrio = 44;
-          req.body.localidadInfractor = id_barrio;
+          req.body.localidadInfractor = { id_barrio, barrio: "Buenos Aires" };
         } else {
-          const [{ id_barrio }] = res.rows;
-          req.body.localidadInfractor = id_barrio;
+          const [{ id_barrio, barrio }] = res.rows;
+          req.body.localidadInfractor = { id_barrio, barrio };
         }
       }
     }

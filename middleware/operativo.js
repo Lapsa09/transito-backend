@@ -163,20 +163,20 @@ const operativoPaseo = async (req, res, next) => {
   const { fecha, turno, lp, motivo } = req.body;
 
   const op = await pool.query(
-    "select id_op from nuevo_control.operativos where fecha=$1 and turno=$2 and lp=$3 and motivo=$4",
+    "select * from nuevo_control.operativos where fecha=$1 and turno=$2 and lp=$3 and motivo=$4",
     [sqlDateFormat(fecha), turno, lp, motivo]
   );
 
   if (op.rows.length === 0) {
     const id_op = await pool.query(
-      "insert into nuevo_control.operativos(fecha,turno,lp,motivo) values($1,$2,$3,$4) returning id_op",
+      "insert into nuevo_control.operativos(fecha,turno,lp,motivo) values($1,$2,$3,$4) returning *",
       [sqlDateFormat(fecha), turno, lp, motivo]
     );
 
-    req.body.id_operativo = id_op.rows[0].id_op;
+    req.body.operativo = id_op.rows[0];
     next();
   } else {
-    req.body.id_operativo = op.rows[0].id_op;
+    req.body.operativo = op.rows[0];
     next();
   }
 };
