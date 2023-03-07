@@ -107,18 +107,18 @@ router.post("/geocoding", async (req, res) => {
     for (const i in geoEmpty) {
       const busca = autos.rows.find(
         (row) =>
-          row.direccion_full === autos.rows[i].direccion_full &&
+          row.direccion_full === geoEmpty[i].direccion_full &&
           row.latitud != null &&
           row.longitud != null
       );
       if (!busca) {
         const { latitud, longitud } = await geoLocation(
-          autos.rows[i].direccion_full
+          geoEmpty[i].direccion_full
         );
 
         await pool.query(
           "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, autos.rows[i].direccion_full]
+          [latitud, longitud, geoEmpty[i].direccion_full]
         );
       } else {
         await pool.query(
