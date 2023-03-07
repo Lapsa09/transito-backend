@@ -3,7 +3,7 @@ const pool = require("../pool");
 const { spawn } = require("child_process");
 
 const radicacion = (req, res, next) => {
-  const { dominio } = req.body;
+  const { dominio, extranjero } = req.body;
 
   const pythonProcess = spawn("python", [process.env.DNRPA_ROUTE, dominio]);
 
@@ -43,6 +43,10 @@ const radicacion = (req, res, next) => {
   });
 
   pythonProcess.stderr.on("data", (data) => {
+    if (extranjero) {
+      req.body.localidadInfractor = { id_barrio: 411, barrio: "EXTRANJERO" };
+      next();
+    }
     console.log(data.toString());
     res.status(500).json("Server error");
   });
