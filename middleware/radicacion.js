@@ -46,9 +46,10 @@ const radicacion = (req, res, next) => {
     if (extranjero) {
       req.body.localidadInfractor = { id_barrio: 411, barrio: "EXTRANJERO" };
       next();
+    } else {
+      console.log(data.toString());
+      res.status(500).json("Server error");
     }
-    console.log(data.toString());
-    res.status(500).json("Server error");
   });
 };
 

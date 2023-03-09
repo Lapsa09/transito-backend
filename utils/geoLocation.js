@@ -1,5 +1,4 @@
 const axios = require("axios");
-const pool = require("../pool");
 require("dotenv").config();
 
 const geoLocation = async (direccion) => {
