@@ -6,6 +6,7 @@ router.use("/control", require("./control"));
 router.use("/sueldos", require("./sueldos"));
 router.use("/auth", require("./jwtAuth"));
 router.use("/waze", require("./waze"));
+router.use("/radio", require("./radio"));
 
 router.get("/api/:type", async (req, res) => {
   try {
