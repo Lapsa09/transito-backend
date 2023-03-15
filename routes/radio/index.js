@@ -3,9 +3,7 @@ const pool = require("../../pool");
 
 router.get("/operarios", async (req, res) => {
   try {
-    const operarios = await pool.query(
-      "select * from radio.operarios_servicios"
-    );
+    const operarios = await pool.query("select * from radio.operario_servicio");
 
     res.json(operarios.rows);
   } catch (error) {
@@ -16,7 +14,7 @@ router.get("/operarios", async (req, res) => {
 
 router.get("/moviles", async (req, res) => {
   try {
-    const moviles = await pool.query("select * from radio.moviles");
+    const moviles = await pool.query("select * from radio.movil");
 
     res.json(moviles.rows);
   } catch (error) {
@@ -40,7 +38,7 @@ router.post("/operarios", async (req, res) => {
     } = req.body;
 
     const data = await pool.query(
-      "insert into radio.operarios_servicios(legajo,nombre,qth,estado,movil,novedades,puntaje,asistencia) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",
+      "insert into radio.operario_servicio(legajo,nombre,qth,estado,movil,novedades,puntaje,asistencia) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",
       [legajo, nombre, qth, estado, movil, novedades, ht, puntaje, asistencia]
     );
     res.json(data.rows[0]);
@@ -55,7 +53,7 @@ router.post("/moviles", async (req, res) => {
     const { movil, estado, novedades } = req.body;
 
     const data = await pool.query(
-      "insert into radio.moviles(movil,estado,novedades) values($1,$2,$3) returning *",
+      "insert into radio.movil(movil,estado,novedades) values($1,$2,$3) returning *",
       [movil, estado, novedades]
     );
 
@@ -82,7 +80,7 @@ router.put("/operarios", async (req, res) => {
     } = req.body;
 
     const data = await pool.query(
-      "update radio.operarios_servicios set legajo=$1 nombre=$2 qth=$3 estado=$4 movil=$5 novedades=$6 ht=$7 puntaje=$8 asistencia=$9 where id=$10 returning *",
+      "update radio.operario_servicio set legajo=$1 nombre=$2 qth=$3 estado=$4 movil=$5 novedades=$6 ht=$7 puntaje=$8 asistencia=$9 where id=$10 returning *",
       [
         legajo,
         nombre,
@@ -108,7 +106,7 @@ router.put("/moviles", async (req, res) => {
     const { movil, estado, novedades } = req.body;
 
     const data = await pool.query(
-      "update radio.moviles set estado=$1 novedades=$2 where movil=$3 returning *",
+      "update radio.movil set estado=$1 novedades=$2 where movil=$3 returning *",
       [estado, novedades, movil]
     );
 
