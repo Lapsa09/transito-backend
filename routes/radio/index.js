@@ -4,7 +4,7 @@ const pool = require("../../pool");
 router.get("/operarios", async (req, res) => {
   try {
     const operarios = await pool.query(
-      "select o.legajo,o.nombre,o.ht,o.qth,o.puntaje,o.asistencia,o.movil,o.novedades,e.estado from radio.operario_servicio o join radio.estado_movil e on o.estado=e.id_estado"
+      "select o.id, o.legajo,o.nombre,o.ht,o.qth,o.puntaje,o.asistencia,o.movil,o.novedades,e.estado from radio.operario_servicio o join radio.estado_movil e on o.estado=e.id_estado"
     );
 
     res.header("Access-Control-Expose-Headers", "X-Total-Count");
@@ -137,8 +137,9 @@ router.post("/moviles", async (req, res) => {
   }
 });
 
-router.put("/operarios", async (req, res) => {
+router.put("/operarios/:id", async (req, res) => {
   try {
+    const { id } = req.params;
     const {
       legajo,
       nombre,
@@ -149,11 +150,10 @@ router.put("/operarios", async (req, res) => {
       ht,
       puntaje,
       asistencia,
-      id,
     } = req.body;
 
     const data = await pool.query(
-      "update radio.operario_servicio set legajo=$1 nombre=$2 qth=$3 estado=$4 movil=$5 novedades=$6 ht=$7 puntaje=$8 asistencia=$9 where id=$10 returning *",
+      "update radio.operario_servicio set legajo=$1, nombre=$2, qth=$3, estado=$4, movil=$5, novedades=$6, ht=$7, puntaje=$8, asistencia=$9 where id=$10 returning *",
       [
         legajo,
         nombre,
@@ -174,9 +174,10 @@ router.put("/operarios", async (req, res) => {
   }
 });
 
-router.put("/moviles", async (req, res) => {
+router.put("/moviles/:id", async (req, res) => {
   try {
-    const { id, estado, novedades } = req.body;
+    const { id } = req.params;
+    const { estado, novedades } = req.body;
 
     const data = await pool.query(
       "update radio.movil set estado=$1 novedades=$2 where movil=$3 returning *",
