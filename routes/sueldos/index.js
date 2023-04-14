@@ -78,19 +78,24 @@ router.get("/acopio/:id", async (req, res) => {
 });
 
 router.get("/precios/:id", async (req, res) => {
-  const response = await pool.query("select * from sueldos.precios");
+  const { id } = req.params;
+  const response = await pool.query(
+    "select * from sueldos.precios where id=$1",
+    [id]
+  );
 
-  res.json({ ...response.rows[0], id: 0 });
+  res.json(response.rows[0]);
 });
 
 router.put("/precios/:id", async (req, res) => {
-  const { precio_normal, precio_pico } = req.body;
+  const { id } = req.params;
+  const { precio } = req.body;
   const response = await pool.query(
-    "update sueldos.precios set precio_normal=$1,precio_pico=$2",
-    [precio_normal, precio_pico]
+    "update sueldos.precios set precio=$1 where id=$2 returning *",
+    [precio, id]
   );
 
-  res.json({ ...response.rows[0], id: 0 });
+  res.json(response.rows[0]);
 });
 
 router.put("/memos/:id", async (req, res) => {
