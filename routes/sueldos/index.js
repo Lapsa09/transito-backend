@@ -78,24 +78,34 @@ router.get("/acopio/:id", async (req, res) => {
 });
 
 router.get("/precios/:id", async (req, res) => {
-  const { id } = req.params;
-  const response = await pool.query(
-    "select * from sueldos.precios where id=$1",
-    [id]
-  );
+  try {
+    const { id } = req.params;
+    const response = await pool.query(
+      "select * from sueldos.precios where id=$1",
+      [id]
+    );
 
-  res.json(response.rows[0]);
+    res.json(response.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
 });
 
 router.put("/precios/:id", async (req, res) => {
-  const { id } = req.params;
-  const { precio } = req.body;
-  const response = await pool.query(
-    "update sueldos.precios set precio=$1 where id=$2 returning *",
-    [precio, id]
-  );
+  try {
+    const { id } = req.params;
+    const { precio } = req.body;
+    const response = await pool.query(
+      "update sueldos.precios set precio=$1 where id=$2 returning *",
+      [precio, id]
+    );
 
-  res.json(response.rows[0]);
+    res.json(response.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
 });
 
 router.put("/memos/:id", async (req, res) => {
