@@ -50,7 +50,7 @@ router.post("/", operativoPaseo, radicacion, async (req, res) => {
     );
     if (repetido.rows.length === 0) {
       const registro = await pool.query(
-        "insert into nuevo_control.registros(hora, id_zona, dominio, acta, resolucion, fechacarga, lpcarga, mes, id_localidad, id_operativo) values($1, $2, $3, $4, $5, now(), $6, $7, $8, $9) returning *",
+        "with new_row as ( insert into nuevo_control.registros(hora, id_zona, dominio, acta, resolucion, fechacarga, lpcarga, mes, id_localidad, id_operativo) values($1, $2, $3, $4, $5, now(), $6, $7, $8, $9) returning * ) select * from new_row join nuevo_control.zonas z on z.id_zona=new_row.id_zona join barrios l on l.id_barrio=new_row.id_localidad join nuevo_control.operativos o on o.id_op=new_row.id_operativo",
         [
           timeFormat(hora),
           direccion,
@@ -60,14 +60,10 @@ router.post("/", operativoPaseo, radicacion, async (req, res) => {
           lpcarga,
           getMonth(fecha),
           localidadInfractor.id_barrio,
-          operativo.id_op,
+          operativo,
         ]
       );
-      res.json({
-        ...operativo,
-        ...registro.rows[0],
-        localidadInfractor: localidadInfractor.barrio,
-      });
+      res.json(registro.rows[0]);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }

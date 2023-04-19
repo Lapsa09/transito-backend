@@ -29,9 +29,9 @@ const operativoAlcoholemia = async (req, res, next) => {
       ]
     );
 
-    if (op.rows.length === 0) {
+    if (op.rowCount === 0) {
       const id_op = await pool.query(
-        "insert into operativos.operativos(fecha,qth,turno,legajo_a_cargo,legajo_planilla,id_localidad,seguridad,hora,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",
+        "insert into operativos.operativos(fecha,qth,turno,legajo_a_cargo,legajo_planilla,id_localidad,seguridad,hora,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
         [
           sqlDateFormat(fecha),
           direccion,
@@ -45,29 +45,10 @@ const operativoAlcoholemia = async (req, res, next) => {
         ]
       );
 
-      req.body.operativo = {
-        ...id_op.rows[0],
-        qth: direccion,
-        fecha,
-        hora,
-        barrio: zona.barrio,
-        cp: zona.cp,
-      };
+      req.body.operativo = id_op.rows[0].id_op;
       next();
     } else {
-      req.body.operativo = {
-        ...op.rows[0],
-        qth: direccion,
-        fecha,
-        hora,
-        legajo_a_cargo,
-        legajo_planilla,
-        turno,
-        seguridad,
-        barrio: zona.barrio,
-        direccion_full: `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
-        cp: zona.cp,
-      };
+      req.body.operativo = op.rows[0].id_op;
       next();
     }
   } catch (error) {
@@ -92,9 +73,9 @@ const operativoCamiones = async (req, res, next) => {
       ]
     );
 
-    if (op.rows.length === 0) {
+    if (op.rowCount === 0) {
       const id_op = await pool.query(
-        "insert into camiones.operativos(fecha,turno,legajo,direccion,id_localidad,direccion_full) values($1,$2,$3,$4,$5,$6) returning *",
+        "insert into camiones.operativos(fecha,turno,legajo,direccion,id_localidad,direccion_full) values($1,$2,$3,$4,$5,$6) returning id_op",
         [
           sqlDateFormat(fecha),
           turno,
@@ -105,25 +86,10 @@ const operativoCamiones = async (req, res, next) => {
         ]
       );
 
-      req.body.operativo = {
-        ...id_op.rows[0],
-        direccion,
-        fecha,
-        localidad: zona.barrio,
-        cp: zona.cp,
-      };
+      req.body.operativo = id_op.rows[0].id_op;
       next();
     } else {
-      req.body.operativo = {
-        ...op.rows[0],
-        direccion,
-        fecha,
-        legajo,
-        localidad: zona.barrio,
-        direccion_full: `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
-        cp: zona.cp,
-        turno,
-      };
+      req.body.operativo = op.rows[0].id_op;
       next();
     }
   } catch (error) {
@@ -163,20 +129,20 @@ const operativoPaseo = async (req, res, next) => {
   const { fecha, turno, lp, motivo } = req.body;
 
   const op = await pool.query(
-    "select * from nuevo_control.operativos where fecha=$1 and turno=$2 and lp=$3 and motivo=$4",
+    "select id_op from nuevo_control.operativos where fecha=$1 and turno=$2 and lp=$3 and motivo=$4",
     [sqlDateFormat(fecha), turno, lp, motivo]
   );
 
-  if (op.rows.length === 0) {
+  if (op.rowCount === 0) {
     const id_op = await pool.query(
-      "insert into nuevo_control.operativos(fecha,turno,lp,motivo) values($1,$2,$3,$4) returning *",
+      "insert into nuevo_control.operativos(fecha,turno,lp,motivo) values($1,$2,$3,$4) returning id_op",
       [sqlDateFormat(fecha), turno, lp, motivo]
     );
 
-    req.body.operativo = id_op.rows[0];
+    req.body.operativo = id_op.rows[0].id_op;
     next();
   } else {
-    req.body.operativo = op.rows[0];
+    req.body.operativo = op.rows[0].id_op;
     next();
   }
 };
@@ -211,7 +177,7 @@ const operativoMotos = async (req, res, next) => {
 
     if (op.rows.length === 0) {
       const id_op = await pool.query(
-        "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",
+        "insert into motos.operativos(fecha,hora,qth,legajo_a_cargo,legajo_planilla,turno,seguridad,id_zona,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id_op",
         [
           sqlDateFormat(fecha),
           sqlTimeFormat(hora),
@@ -225,29 +191,10 @@ const operativoMotos = async (req, res, next) => {
         ]
       );
 
-      req.body.operativo = {
-        ...id_op.rows[0],
-        direccion,
-        fecha,
-        hora,
-        zona: zona.barrio,
-        cp: zona.cp,
-      };
+      req.body.operativo = id_op.rows[0].id_op;
       next();
     } else {
-      req.body.operativo = {
-        ...op.rows[0],
-        direccion,
-        fecha,
-        hora,
-        legajo_a_cargo,
-        legajo_planilla,
-        turno,
-        seguridad,
-        zona: zona.barrio,
-        direccion_full: `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
-        cp: zona.cp,
-      };
+      req.body.operativo = op.rows[0].id_op;
       next();
     }
   } catch (error) {

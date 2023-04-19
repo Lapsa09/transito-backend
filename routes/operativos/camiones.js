@@ -40,12 +40,12 @@ router.post("/", operativoCamiones, async (req, res) => {
 
     const repetido = await pool.query(
       "select dominio, id_operativo from camiones.registros where id_operativo=$1 and dominio=$2",
-      [operativo.id_op, dominio]
+      [operativo, dominio]
     );
 
     if (repetido.rows.length === 0) {
       const nuevo = await pool.query(
-        "insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo,latitud,longitud,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14,$15,$16,$17) returning *",
+        "with new_row as(insert into camiones.registros(hora,dominio,origen,id_localidad_origen,destino,id_localidad_destino,licencia,remito,carga,resolucion,acta,id_motivo,hora_carga,legajo_carga,id_operativo,latitud,longitud,direccion_full) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now(),$13,$14,$15,$16,$17) returning *) select nr.id, nr.hora, nr.dominio, nr.origen, nr.id_localidad_origen, nr.destino, nr.id_localidad_destino, nr.licencia, nr.remito, nr.carga, nr.resolucion, nr.acta, nr.id_motivo, nr.hora_carga, nr.legajo_carga, nr.id_operativo, nr.latitud, nr.longitud, nr.direccion_full, o.fecha, o.turno, o.legajo, o.direccion, loc.barrio as localidad, loc.cp, ori.barrio as localidad_origen, dest.barrio as localidad_destino, m.motivo from new_row nr inner join camiones.operativos o on nr.id_operativo=o.id_op left join vicente_lopez loc on o.id_localidad=loc.id_barrio left join barrios ori on nr.id_localidad_origen=ori.id_barrio left join barrios dest on nr.id_localidad_destino=dest.id_barrio left join motivos m on m.id_motivo=nr.id_motivo",
         [
           timeFormat(hora),
           dominio,
@@ -60,20 +60,14 @@ router.post("/", operativoCamiones, async (req, res) => {
           acta,
           motivo?.id_motivo || null,
           lpcarga,
-          operativo.id_op,
+          operativo,
           latitud,
           longitud,
           `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
         ]
       );
       const [registro] = nuevo.rows;
-      res.json({
-        ...operativo,
-        ...registro,
-        localidad_origen: localidad_origen.barrio,
-        localidad_destino: localidad_destino.barrio,
-        motivo: motivo?.motivo,
-      });
+      res.json(registro);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }

@@ -44,11 +44,11 @@ router.post("/", operativoMotos, async (req, res) => {
 
     const repetido = await pool.query(
       "select dominio,id_operativo from motos.registros where id_operativo=$1 and dominio=$2",
-      [operativo.id_op, dominio]
+      [operativo, dominio]
     );
     if (repetido.rows.length === 0) {
       const id_v = await pool.query(
-        "insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning *",
+        "with new_row as (insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning *) select o.fecha, o.hora,o.qth as direccion,z.barrio as zona,z.cp,o.legajo_a_cargo, o.legajo_planilla, o.turno,o.seguridad,mo.dominio,mo.licencia,li.tipo as tipo_licencia, mo.acta,mo.resolucion,zi.barrio as zona_infractor,mo.fechacarga,mo.lpcarga from new_row mo inner join motos.operativos o on o.id_op=mo.id_operativo left join vicente_lopez z on o.id_zona=z.id_barrio left join tipo_licencias li on mo.id_licencia=li.id_tipo left join motivos mot on momo.id_motivo=mot.id_motivo left join barrios zi on mo.id_zona_infractor=zi.id_barrio",
         [
           dominio,
           parseInt(licencia) || null,
@@ -60,26 +60,21 @@ router.post("/", operativoMotos, async (req, res) => {
           `${direccion}, ${zona.cp}, Vicente Lopez, Buenos Aires, Argentina`,
           tipo_licencia?.id_tipo || null,
           zona_infractor.id_barrio,
-          operativo.id_op,
+          operativo,
         ]
       );
       const [registro] = id_v.rows;
-      operativo.motivos = [];
+      registro.motivos = [];
       if (motivos?.length > 0) {
         for (const motivo in motivos) {
           await pool.query(
             "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
             [registro.id, motivos[motivo].id_motivo]
           );
-          operativo.motivos.push(motivos[motivo].motivo);
+          registro.motivos.push(motivos[motivo].motivo);
         }
       }
-      res.json({
-        ...operativo,
-        ...registro,
-        tipo_licencia: tipo_licencia?.tipo,
-        zona_infractor: zona_infractor.barrio,
-      });
+      res.json(motivos);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }

@@ -52,7 +52,7 @@ router.post(
       );
       if (repetido.rows.length === 0) {
         const nuevo = await pool.query(
-          "insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning *",
+          "with new_row as(insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning *) select nr.*,o.fecha,o.hora,o.qth,z.barrio,z.cp,o.legajo_a_cargo,o.legajo_planilla,o.turno,o.seguridad,l.tipo as tipo_licencia,l.vehiculo as tipo_vehiculo,zi.barrio as zona_infractor,m.motivo from new_row nr inner join operativos.operativos o on o.id_op=nr.id_operativo left join tipo_licencias l on nr.id_licencia=l.id_tipo left join vicente_lopez z on o.id_localidad=z.id_barrio left join barrios zi on nr.id_zona_infractor=zi.id_barrio left join motivos m on m.id_motivo=nr.id_motivo",
           [
             dominio,
             parseInt(licencia) || null,
@@ -70,18 +70,11 @@ router.post(
             longitud,
             tipo_licencia?.id_tipo || null,
             zona_infractor.id_barrio,
-            operativo.id_op,
+            operativo,
           ]
         );
         const [registro] = nuevo.rows;
-        res.json({
-          ...operativo,
-          ...registro,
-          tipo_licencia: tipo_licencia?.tipo,
-          zona_infractor: zona_infractor.barrio,
-          motivo: motivo?.motivo,
-          tipo_vehiculo: tipo_licencia?.vehiculo,
-        });
+        res.json(registro);
       } else {
         res
           .status(401)
