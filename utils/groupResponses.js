@@ -21,7 +21,7 @@ const groupByCliente = (data) => {
     }
     let historia = cliente.historial.find(
       (h) =>
-        h.id_cliente +
+        row.id_cliente +
           getMonthJS(row.fecha_servicio) +
           getYear(row.fecha_servicio) ===
         h.id
@@ -36,8 +36,8 @@ const groupByCliente = (data) => {
           name: getMonthName(row.fecha_servicio),
         },
         año: getYear(row.fecha_servicio),
-        gastos: row.importe_servicio,
-        acopio: row.importe_recibo - row.importe_servicio,
+        gastos: 0,
+        acopio: 0,
         id:
           row.id_cliente +
           getMonthJS(row.fecha_servicio) +
@@ -46,27 +46,47 @@ const groupByCliente = (data) => {
       };
       cliente.historial.push(historia);
     }
-    historia.servicios.push({
-      id_servicio: row.id_servicio,
-      recibo: row.recibo,
-      fecha_recibo: row.fecha_recibo,
-      importe_recibo: row.importe_recibo,
-      fecha_servicio: row.fecha_servicio,
-      importe_servicio: row.importe_servicio,
-      memo: row.memo,
-      operarios: [
-        {
-          legajo: row.legajo,
-          nombre: row.nombre,
-          a_cobrar: row.a_cobrar,
-          cancelado: row.cancelado,
-        },
-      ],
-    });
-    historia.gastos += row.importe_servicio;
-    historia.acopio += row.importe_recibo - row.importe_servicio;
-    cliente.a_deudor += row.importe_servicio;
-    cliente.a_favor += row.importe_recibo - row.importe_servicio;
+
+    let servicio = historia.servicios.find(
+      (s) => s.id_servicio === row.id_servicio
+    );
+    if (!servicio) {
+      servicio = {
+        id_servicio: row.id_servicio,
+        recibo: row.recibo,
+        fecha_recibo: row.fecha_recibo,
+        importe_recibo: row.importe_recibo,
+        fecha_servicio: row.fecha_servicio,
+        importe_servicio: row.importe_servicio,
+        acopio: row.importe_recibo - row.importe_servicio,
+        memo: row.memo,
+        operarios: [
+          {
+            legajo: row.legajo,
+            nombre: row.nombre,
+            a_cobrar: row.a_cobrar,
+            cancelado: row.cancelado,
+          },
+        ],
+      };
+      historia.servicios.push(servicio);
+    } else {
+      servicio.operarios.push({
+        legajo: row.legajo,
+        nombre: row.nombre,
+        a_cobrar: row.a_cobrar,
+        cancelado: row.cancelado,
+      });
+    }
+
+    historia.gastos = historia.servicios.reduce(
+      (a, b) => a + b.importe_servicio,
+      0
+    );
+    historia.acopio = historia.servicios.reduce((a, b) => a + b.acopio, 0);
+    cliente.a_deudor = cliente.historial.reduce((a, b) => a + b.gastos, 0);
+    cliente.a_favor = cliente.historial.reduce((a, b) => a + b.acopio, 0);
+
     return acc;
   }, []);
 };
