@@ -46,7 +46,7 @@ router.post("/", operativoPaseo, radicacion, async (req, res) => {
   try {
     const repetido = await pool.query(
       "select dominio,id_operativo from nuevo_control.registros where id_operativo=$1 and dominio=$2",
-      [operativo.id_op, dominio]
+      [operativo, dominio]
     );
     if (repetido.rows.length === 0) {
       const registro = await pool.query(
@@ -59,10 +59,11 @@ router.post("/", operativoPaseo, radicacion, async (req, res) => {
           resolucion,
           lpcarga,
           getMonth(fecha),
-          localidadInfractor.id_barrio,
+          localidadInfractor,
           operativo,
         ]
       );
+      console.log(registro.rows);
       res.json(registro.rows[0]);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
