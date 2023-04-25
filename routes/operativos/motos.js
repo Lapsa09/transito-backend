@@ -48,7 +48,7 @@ router.post("/", operativoMotos, async (req, res) => {
     );
     if (repetido.rows.length === 0) {
       const id_v = await pool.query(
-        "with new_row as (insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning *) select o.fecha, o.hora,o.qth as direccion,z.barrio as zona,z.cp,o.legajo_a_cargo, o.legajo_planilla, o.turno,o.seguridad,mo.dominio,mo.licencia,li.tipo as tipo_licencia, mo.acta,mo.resolucion,zi.barrio as zona_infractor,mo.fechacarga,mo.lpcarga from new_row mo inner join motos.operativos o on o.id_op=mo.id_operativo left join vicente_lopez z on o.id_zona=z.id_barrio left join tipo_licencias li on mo.id_licencia=li.id_tipo left join barrios zi on mo.id_zona_infractor=zi.id_barrio",
+        "with new_row as (insert into motos.registros(dominio,licencia,acta,resolucion,fechacarga,lpcarga,mes,semana,direccion_full,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,now(),$5,$6,$7,$8,$9,$10,$11) returning *) select mo.id, o.fecha, o.hora,o.qth as direccion,z.barrio as zona,z.cp,o.legajo_a_cargo, o.legajo_planilla, o.turno,o.seguridad,mo.dominio,mo.licencia,li.tipo as tipo_licencia, mo.acta,mo.resolucion,zi.barrio as zona_infractor,mo.fechacarga,mo.lpcarga from new_row mo inner join motos.operativos o on o.id_op=mo.id_operativo left join vicente_lopez z on o.id_zona=z.id_barrio left join tipo_licencias li on mo.id_licencia=li.id_tipo left join barrios zi on mo.id_zona_infractor=zi.id_barrio",
         [
           dominio,
           parseInt(licencia) || null,
@@ -74,7 +74,7 @@ router.post("/", operativoMotos, async (req, res) => {
           registro.motivos.push(motivos[motivo].motivo);
         }
       }
-      res.json(motivos);
+      res.json(registro);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
     }
