@@ -55,15 +55,14 @@ router.post("/", sueldos, async (req, res) => {
       importe_servicio,
       feriado,
     } = req.body;
-
     const servicio = await pool.query(
       "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio as id,*",
       [
         id_cliente,
         memo,
-        recibo || null,
-        fecha_recibo || null,
-        importe_recibo || null,
+        recibo,
+        fecha_recibo,
+        importe_recibo,
         fecha_servicio,
         importe_servicio,
         feriado,
@@ -71,15 +70,15 @@ router.post("/", sueldos, async (req, res) => {
     );
     const [{ id_servicio }] = servicio.rows;
 
-    for (const o in operarios) {
+    for (const operario of operarios) {
       await pool.query(
         "insert into sueldos.operarios_servicios (legajo,id_servicio,a_cobrar,hora_inicio,hora_fin,cancelado) values ($1,$2,$3,$4,$5,false)",
         [
-          operarios[o].legajo,
+          operario.legajo,
           id_servicio,
-          operarios[o].a_cobrar,
-          timeFormat(operarios[o].hora_inicio),
-          timeFormat(operarios[o].hora_fin),
+          operario.a_cobrar,
+          timeFormat(operario.hora_inicio),
+          timeFormat(operario.hora_fin),
         ]
       );
     }
@@ -158,14 +157,14 @@ router.put("/:id", async (req, res) => {
       ]
     );
 
-    for (const i in operarios) {
+    for (const operario of operarios) {
       await pool.query(
         "update sueldos.operarios_servicios set legajo=$1,a_cobrar=$2,hora_inicio=$3,hora_fin=$4 where id_servicio=$5",
         [
-          operarios[i].legajo,
-          operarios[i].a_cobrar,
-          timeFormat(operarios[i].hora_inicio),
-          timeFormat(operarios[i].hora_fin),
+          operario.legajo,
+          operario.a_cobrar,
+          timeFormat(operario.hora_inicio),
+          timeFormat(operario.hora_fin),
           id,
         ]
       );

@@ -67,14 +67,19 @@ router.get("/memos/:id", async (req, res) => {
 });
 
 router.get("/acopio/:id", async (req, res) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const response = await pool.query(
-    "select sum(coalesce(importe_recibo,0)-importe_servicio) as acopio from sueldos.servicios where id_cliente=$1",
-    [id]
-  );
+    const response = await pool.query(
+      "select sum(coalesce(importe_recibo,0)-importe_servicio) as acopio from sueldos.servicios where id_cliente=$1",
+      [id]
+    );
 
-  res.json({ ...response.rows[0], id });
+    res.json({ ...response.rows[0], id });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Server error");
+  }
 });
 
 router.get("/precios/:id", async (req, res) => {

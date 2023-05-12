@@ -48,7 +48,7 @@ router.post(
 
       const repetido = await pool.query(
         "select dominio,id_operativo from operativos.registros where id_operativo=$1 and dominio=$2",
-        [operativo.id_op, dominio]
+        [operativo, dominio]
       );
       if (repetido.rows.length === 0) {
         const nuevo = await pool.query(
@@ -98,20 +98,19 @@ router.post("/geocoding", async (req, res) => {
     );
 
     for (const i in geoEmpty) {
+      const actual = geoEmpty[i];
       const busca = autos.rows.find(
         (row) =>
-          row.direccion_full === geoEmpty[i].direccion_full &&
+          row.direccion_full === actual.direccion_full &&
           row.latitud != null &&
           row.longitud != null
       );
       if (!busca) {
-        const { latitud, longitud } = await geoLocation(
-          geoEmpty[i].direccion_full
-        );
+        const { latitud, longitud } = await geoLocation(actual.direccion_full);
 
         await pool.query(
           "update operativos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, geoEmpty[i].direccion_full]
+          [latitud, longitud, actual.direccion_full]
         );
       } else {
         await pool.query(

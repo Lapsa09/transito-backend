@@ -66,12 +66,12 @@ router.post("/", operativoMotos, async (req, res) => {
       const [registro] = id_v.rows;
       registro.motivos = [];
       if (motivos?.length > 0) {
-        for (const motivo in motivos) {
+        for (const motivo of motivos) {
           await pool.query(
             "insert into motos.moto_motivo(id_registro,id_motivo) values($1,$2)",
-            [registro.id, motivos[motivo].id_motivo]
+            [registro.id, motivo.id_motivo]
           );
-          registro.motivos.push(motivos[motivo].motivo);
+          registro.motivos.push(motivo.motivo);
         }
       }
       res.json(registro);
@@ -95,20 +95,19 @@ router.post("/geocoding", async (req, res) => {
     );
 
     for (const i in geoEmpty) {
+      const actual = geoEmpty[i];
       const busca = motos.rows.find(
         (row) =>
-          row.direccion_full === geoEmpty[i].direccion_full &&
+          row.direccion_full === actual.direccion_full &&
           row.latitud != null &&
           row.longitud != null
       );
       if (!busca) {
-        const { latitud, longitud } = await geoLocation(
-          geoEmpty[i].direccion_full
-        );
+        const { latitud, longitud } = await geoLocation(actual.direccion_full);
 
         await pool.query(
           "update motos.operativos set latitud=$1, longitud=$2 where direccion_full=$3",
-          [latitud, longitud, geoEmpty[i].direccion_full]
+          [latitud, longitud, actual.direccion_full]
         );
       } else {
         await pool.query(
