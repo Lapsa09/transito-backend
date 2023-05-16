@@ -55,10 +55,10 @@ router.post(
           "with new_row as(insert into operativos.registros(dominio,licencia,acta,id_motivo,graduacion_alcoholica,resolucion,fechacarga,lpcarga,mes,semana,es_del,resultado,direccion_full,latitud,longitud,id_licencia,id_zona_infractor,id_operativo) values ($1,$2,$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning *) select nr.*,o.fecha,o.hora,o.qth,z.barrio,z.cp,o.legajo_a_cargo,o.legajo_planilla,o.turno,o.seguridad,l.tipo as tipo_licencia,l.vehiculo as tipo_vehiculo,zi.barrio as zona_infractor,m.motivo from new_row nr inner join operativos.operativos o on o.id_op=nr.id_operativo left join tipo_licencias l on nr.id_licencia=l.id_tipo left join vicente_lopez z on o.id_localidad=z.id_barrio left join barrios zi on nr.id_zona_infractor=zi.id_barrio left join motivos m on m.id_motivo=nr.id_motivo",
           [
             dominio,
-            parseInt(licencia),
+            parseInt(licencia) || null,
             acta,
             motivo?.id_motivo,
-            parseFloat(graduacion_alcoholica),
+            parseFloat(graduacion_alcoholica) || null,
             resolucion || "PREVENCION",
             lpcarga,
             getMonth(fecha),
