@@ -63,7 +63,6 @@ router.post("/", operativoPaseo, radicacion, async (req, res) => {
           operativo,
         ]
       );
-      console.log(registro.rows);
       res.json(registro.rows[0]);
     } else {
       res.status(401).json("El dominio ingresado ya fue cargado el mismo dia");
