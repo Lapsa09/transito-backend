@@ -49,8 +49,8 @@ const radicacion = (req, res, next) => {
         req.body.localidadInfractor = 411;
         next();
       } else {
-        console.log(data.toString());
-        res.status(500).json("Server error");
+        // console.log(data.toString());
+        res.status(404).json("El dominio no existe");
       }
     });
   } catch (error) {
