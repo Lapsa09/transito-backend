@@ -197,7 +197,7 @@ const groupByMemo = (data) => {
     if (busca) {
       busca.operarios ??= [];
       busca.operarios.push({
-        id: +row.id,
+        id: row.id + row.legajo,
         cliente: row.cliente,
         memo: row.memo,
         fecha_servicio: dateFormatJS(row.fecha_servicio),
@@ -215,7 +215,7 @@ const groupByMemo = (data) => {
       return acc;
     } else {
       const obj = {
-        id: row.id,
+        id: row.id + row.legajo,
         memo: row.memo,
         fecha_servicio: dateFormatJS(row.fecha_servicio),
         cliente: row.cliente,
