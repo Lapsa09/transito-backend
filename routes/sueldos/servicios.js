@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   try {
     const { _sort, _order, d, _start, _end, m, y, q = "", no_memo } = req.query;
     const servicios = await pool.query(
-      "select s.id_servicio as id,upper(c.cliente) as cliente,s.fecha_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios op on o.legajo=op.legajo order by s.fecha_servicio asc"
+      "select s.id_servicio,upper(c.cliente) as cliente,s.fecha_servicio,s.memo,o.legajo,op.nombre,o.a_cobrar,o.hora_inicio,o.hora_fin,o.cancelado from sueldos.servicios s left join sueldos.operarios_servicios o on s.id_servicio=o.id_servicio left join sueldos.clientes c on s.id_cliente=c.id_cliente left join sueldos.operarios op on o.legajo=op.legajo order by s.fecha_servicio asc"
     );
     const result = servicios.rows
       .sort((a, b) => sorting(a, b, _order, _sort))
@@ -49,36 +49,25 @@ router.post("/", sueldos, async (req, res) => {
       memo,
       fecha_servicio,
       operarios,
-      recibo,
-      fecha_recibo,
-      importe_recibo,
       importe_servicio,
       feriado,
     } = req.body;
     const servicio = await pool.query(
-      "insert into sueldos.servicios (id_cliente,memo,recibo,fecha_recibo,importe_recibo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id_servicio as id,*",
-      [
-        id_cliente,
-        memo,
-        recibo,
-        fecha_recibo,
-        importe_recibo,
-        fecha_servicio,
-        importe_servicio,
-        feriado,
-      ]
+      "insert into sueldos.servicios (id_cliente,memo,fecha_servicio,importe_servicio,feriado) values ($1,$2,$3,$4,$5) returning id_servicio as id,*",
+      [id_cliente, memo, fecha_servicio, importe_servicio, feriado]
     );
     const [{ id_servicio }] = servicio.rows;
 
     for (const operario of operarios) {
       await pool.query(
-        "insert into sueldos.operarios_servicios (legajo,id_servicio,a_cobrar,hora_inicio,hora_fin,cancelado) values ($1,$2,$3,$4,$5,false)",
+        "insert into sueldos.operarios_servicios (legajo,id_servicio,a_cobrar,hora_inicio,hora_fin,cancelado,recibo) values ($1,$2,$3,$4,$5,false,$6)",
         [
           operario.legajo,
           id_servicio,
           operario.a_cobrar,
           timeFormat(operario.hora_inicio),
           timeFormat(operario.hora_fin),
+          operario.recibo,
         ]
       );
     }

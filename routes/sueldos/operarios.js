@@ -75,17 +75,16 @@ router.put("/cliente/:id", async (req, res) => {
   try {
     const { cancelado, legajo } = req.body;
     const { id } = req.params;
-
-    await pool.query(
-      "update sueldos.operarios_servicios set cancelado=$1 where id_servicio=$2 and legajo=$3",
+    const operario = await pool.query(
+      "update sueldos.operarios_servicios set cancelado=$1 where id_servicio=$2 and legajo=$3 returning concat(id_servicio,legajo) as id,*",
       [cancelado, id, legajo]
     );
 
-    const servicios = await pool.query(
+    await pool.query(
       "update sueldos.servicios set importe_servicio=(select sum(a_cobrar) from sueldos.operarios_servicios where id_servicio=$1 and cancelado=false) where id_servicio=$1 returning id_servicio as id,*",
       [id]
     );
-    res.json(servicios.rows[0]);
+    res.json(operario.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");

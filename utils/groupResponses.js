@@ -149,7 +149,7 @@ const groupByServicio = (data) => {
         id_servicio: +row.id_servicio,
         memo: row.memo,
         recibo: +row.recibo,
-        fecha_recibo: dateFormatJS(row.fecha_recibo),
+        fecha_recibo: row.fecha_recibo,
         importe_recibo: +row.importe_recibo,
         importe_servicio: +row.importe_servicio,
         acopio: +row.acopio,
@@ -170,7 +170,7 @@ const groupByServicio = (data) => {
           id_servicio: +row.id_servicio,
           memo: row.memo,
           recibo: +row.recibo,
-          fecha_recibo: dateFormatJS(row.fecha_recibo),
+          fecha_recibo: row.fecha_recibo,
           importe_recibo: +row.importe_recibo,
           importe_servicio: +row.importe_servicio,
           acopio: +row.acopio,
@@ -197,7 +197,8 @@ const groupByMemo = (data) => {
     if (busca) {
       busca.operarios ??= [];
       busca.operarios.push({
-        id: row.id + row.legajo,
+        id: row.id_servicio + row.legajo,
+        id_servicio: row.id_servicio,
         cliente: row.cliente,
         memo: row.memo,
         fecha_servicio: dateFormatJS(row.fecha_servicio),
@@ -215,7 +216,7 @@ const groupByMemo = (data) => {
       return acc;
     } else {
       const obj = {
-        id: row.id + row.legajo,
+        id: row.id_servicio,
         memo: row.memo,
         fecha_servicio: dateFormatJS(row.fecha_servicio),
         cliente: row.cliente,
@@ -224,7 +225,8 @@ const groupByMemo = (data) => {
       };
       obj.operarios = [
         {
-          id: +row.id,
+          id: row.id_servicio + row.legajo,
+          id_servicio: row.id_servicio,
           cliente: row.cliente,
           memo: row.memo,
           fecha_servicio: dateFormatJS(row.fecha_servicio),
