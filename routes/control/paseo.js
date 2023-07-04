@@ -6,14 +6,20 @@ const {
   filterByWeekDay,
   radicacion,
 } = require("../../middleware");
-const { timeFormat, getMonth } = require("../../utils");
+const { timeFormat, getMonth, getYear } = require("../../utils");
 
 router.get("/", async (req, res) => {
   try {
+    const { y } = req.query;
+
     const controles = await pool.query(
       "select c.id,o.fecha,c.hora,z.zona,l.barrio,c.dominio,o.lp,c.acta,c.resolucion,o.turno,c.fechacarga,c.lpcarga,o.motivo,c.mes from nuevo_control.registros c inner join nuevo_control.operativos o on o.id_op=c.id_operativo left join barrios l on c.id_localidad=l.id_barrio left join nuevo_control.zonas z on z.id_zona=c.id_zona order by c.id desc"
     );
-    res.json(controles.rows);
+
+    const results = controles.rows.filter((item) =>
+      y ? getYear(item.fecha) == y : item
+    );
+    res.json(results);
   } catch (error) {
     console.log(error);
     res.status(500).json("Server error");
