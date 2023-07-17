@@ -19,9 +19,12 @@ const es_del = async (req, res, next) => {
 };
 
 const alcoholemia = (req, res, next) => {
-  if (req.graduacion_alcoholica == 0 || !req.graduacion_alcoholica)
+  if (+req.graduacion_alcoholica === 0 || !req.graduacion_alcoholica)
     req.body.resultado = "NEGATIVA";
-  else if (req.graduacion_alcoholica > 0.05 && req.graduacion_alcoholica < 0.5)
+  else if (
+    +req.graduacion_alcoholica > 0.05 &&
+    +req.graduacion_alcoholica < 0.5
+  )
     req.body.resultado = "NO PUNITIVA";
   else req.body.resultado = "PUNITIVA";
 
